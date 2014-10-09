@@ -4,7 +4,7 @@
 
 // Included Libraries
 #include <Servo.h>
-#define thresholdVal 100
+#define thresholdVal 60
 
 // Pins and Variables
 
@@ -61,7 +61,7 @@ void loop() {
   if (rightValue>thresholdVal)
   {
     stopCar();
-    while(rightValue>thresholdVal){
+    while(rightValue>40){
     rightValue = analogRead(rightIRSensor);
     Serial.println(rightValue);
 

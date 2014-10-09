@@ -32,6 +32,27 @@ void setup() {
   delay(1000);
 }
 
+void setSpeed(int speed)
+{
+  // speed is from 0 to 100 where 0 is off and 100 is max speed
+  // the following maps speed values of 0-100 to angles from 0-180
+  
+  int angle = map(speed, 0, 100, 0, 180);
+  speedServo.write(angle);
+  
+}
+
+void arm() {
+  setSpeed(30);
+  delay(2000);
+  setSpeed(90);
+  delay(2000);
+  setSpeed(30);
+  delay(2000);
+}
+
+  
+
 void loop() {
 // For now, assuming that I have taken in the UART message and 
 // decoded it into a char for the command, and an int or double for
@@ -79,13 +100,13 @@ void loop() {
           case 'R':
               // Set direction servo and camera servo to 
               //parameter in the right direction
-              turnServo.write(inX+90);
+              turnServo.write(90-inX);
               break;
         
           case 'L':
               // Set direction servo and camera servo to 
               //parameter in the left direction
-              turnServo.write(90-inX);
+              turnServo.write(90+inX);
               break;
         
           case 'B':
@@ -94,8 +115,20 @@ void loop() {
         
           case 'A':
               break;
-              // 
+              // Acknowledge
           case 'E':
+              // Error - therefore stop immediately!!
+              if (currentMicro<1500)
+              {
+                speedServo.writeMicroseconds(2000);
+                currentMicro = 2000;
+              }
+              else
+              {
+                speedServo.writeMicroseconds(1500);
+                currentMicro = 1500;
+              }
+              
               break;
            
           }

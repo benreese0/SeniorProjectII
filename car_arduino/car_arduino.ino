@@ -18,6 +18,7 @@ void loop() {
     switch (comm) {
     case 'S':
         
+                
     case 'F':
         // Set speed to parameter
 
@@ -32,6 +33,8 @@ void loop() {
     case 'B':
         // Stop Car, then set reverse speed to given parameter
 
+
+
     case 'A':
         // 
     case 'E':
@@ -41,5 +44,4 @@ void loop() {
 
 
 }
-
 

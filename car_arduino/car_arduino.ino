@@ -85,7 +85,8 @@ void loop() {
     Serial.println(inX);
     switch (comm) {
     case 'S':
-      //
+        
+                
       stopCar();
       
 
@@ -127,6 +128,8 @@ void loop() {
       // Stop Car, then set reverse speed to given parameter
       break;
 
+
+
     case 'A':
       break;
       // Acknowledge
@@ -153,6 +156,8 @@ void loop() {
 
 }
 
+<<<<<<< HEAD
+=======
 void serialEvent() {
   while (Serial.available()) {
     char inChar = char(Serial.read());
@@ -165,3 +170,4 @@ void serialEvent() {
 
 
 
+>>>>>>> ee699930418dc1d67e83da67f6751885b28c524a

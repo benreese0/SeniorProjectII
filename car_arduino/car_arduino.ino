@@ -19,7 +19,9 @@ int currentMicro = 1500;
 int currentAngle = 90;
 int led = 13;
 int rightIRSensor = 2;
+int leftIRSensor = 3;
 int rightValue = 0;
+int leftValue = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -28,12 +30,13 @@ void setup() {
   speedServo.attach(11,1000,2000);
   pinMode(led,OUTPUT);
   analogRead(rightIRSensor);
+  analogRead(leftIRSensor);
   speedServo.writeMicroseconds(1475);
   currentMicro = 1475;
 }
 
 void stopCar() {
- 
+   Serial.print(currentMicro);
   if (currentMicro>1500)
       {
         speedServo.writeMicroseconds(1000);
@@ -50,6 +53,8 @@ void stopCar() {
 
 
 
+
+
 void loop() {
   // For now, assuming that I have taken in the UART message and 
   // decoded it into a char for the command, and an int or double for
@@ -58,12 +63,16 @@ void loop() {
   // Assumptions - name of the char will be comm
   // name of the parameter will be inX
   rightValue = analogRead(rightIRSensor);
-  if (rightValue>thresholdVal)
+  leftValue = analogRead(leftIRSensor);
+  if (rightValue>thresholdVal || leftValue>thresholdVal)
   {
     stopCar();
     delay(500);
-    while(rightValue>75){
-    rightValue = analogRead(rightIRSensor);
+    while(rightValue>75 && leftValue>75){
+      Serial.println(rightValue);
+      rightValue = analogRead(rightIRSensor);
+      leftValue = analogRead(leftIRSensor);
+    
 
     }
   }
@@ -94,7 +103,12 @@ void loop() {
        speedServo.writeMicroseconds(1700);
        }
        */
-      speedServo.writeMicroseconds(inX);
+      if (currentMicro>1480)
+        speedServo.writeMicroseconds(inX);
+      else
+        speedServo.writeMicroseconds(1580);
+        delay(100);
+        speedServo.writeMicroseconds(inX);
       currentMicro = inX;
       break;
     case 'R':

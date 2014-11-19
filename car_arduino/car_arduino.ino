@@ -19,7 +19,17 @@ int currentMicro = 1500;
 int currentAngle = 90;
 int led = 13;
 int rightIRSensor = 2;
+int leftIRSensor = 3;
 int rightValue = 0;
+int leftValue = 0;
+int compStandard = A0;
+int speedSensor = A1;
+int compVal = 0;
+int speedVal = 0;
+unsigned long lastHigh = 0;
+unsigned long lastLow = 0;
+float currentSpeed = 0;
+
 
 void setup() {
   Serial.begin(9600);
@@ -28,12 +38,25 @@ void setup() {
   speedServo.attach(11,1000,2000);
   pinMode(led,OUTPUT);
   analogRead(rightIRSensor);
+  analogRead(leftIRSensor);
+  analogRead(compStandard);
+  analogRead(speedVal);
   speedServo.writeMicroseconds(1475);
   currentMicro = 1475;
+  ACSR =
+   (0 << ACD) |    // Analog Comparator: Enabled
+   (0 << ACBG) |   // Analog Comparator Bandgap Select: AIN0 is applied to the positive input
+   (0 << ACO) |    // Analog Comparator Output: Off
+   (1 << ACI) |    // Analog Comparator Interrupt Flag: Clear Pending Interrupt
+   (1 << ACIE) |   // Analog Comparator Interrupt: Enabled
+   (0 << ACIC) |   // Analog Comparator Input Capture: Disabled
+   (1 << ACIS1) | (1 << ACIS0);   // Analog Comparator Interrupt Mode: Comparator Interrupt on Rising Output Edge
+
+  
 }
 
 void stopCar() {
- 
+   Serial.print(currentMicro);
   if (currentMicro>1500)
       {
         speedServo.writeMicroseconds(1000);
@@ -41,12 +64,46 @@ void stopCar() {
       }
       else
       {
-        speedServo.writeMicroseconds(1475);
-        currentMicro = 1475;
-      }
+        speedServo.writeMicroseconds(1480);
+        currentMicro = 1480;
+      }  
+}
 
+void FcarSpeed(int newSpeed){
+  if (currentMicro <1580 && newSpeed<1580){
+    speedServo.writeMicroseconds(1580);
+    delay(50);
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
+  else if (currentMicro<1480 && newSpeed>1580){
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
+  else if (newSpeed<1480){
+    Serial.print("E\n");
+  }
   
 }
+
+void RcarSpeed(int newSpeed){
+  if (currentMicro > 1480 && newSpeed<1480){
+    speedServo.writeMicroseconds(1200);
+    delay(500);
+    speedServo.writeMicroseconds(1480);
+    delay(100);
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
+  else if (currentMicro < 1480 && newSpeed<1480){
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
+  else {
+    Serial.print("E\n");
+  }
+}
+
 
 
 
@@ -58,45 +115,32 @@ void loop() {
   // Assumptions - name of the char will be comm
   // name of the parameter will be inX
   rightValue = analogRead(rightIRSensor);
-  if (rightValue>thresholdVal)
+  leftValue = analogRead(leftIRSensor);
+  if (rightValue>thresholdVal || leftValue>thresholdVal)
   {
     stopCar();
     delay(500);
-    while(rightValue>75){
-    rightValue = analogRead(rightIRSensor);
-
+    while(rightValue>75 && leftValue>75){
+      Serial.println(rightValue);
+      rightValue = analogRead(rightIRSensor);
+      leftValue = analogRead(leftIRSensor);
     }
   }
   else if (commandComplete){
-    Serial.println(command);
     comm = command[0];
     command = command.substring(1);
     inX = command.toInt();
     Serial.println(comm);
     Serial.println(inX);
     switch (comm) {
-    case 'S':
-      //
+    case 'S':  // Stop Car         
       stopCar();
-      
-
       break;
-    case 'F':
-      /*
-              if (inX==1)
-       {
-       Serial.println("Changing speed to 1");
-       speedServo.writeMicroseconds(1600);
-       // Set speed to parameter
-       }
-       else if (inX==2)
-       {
-       speedServo.writeMicroseconds(1700);
-       }
-       */
-      speedServo.writeMicroseconds(inX);
-      currentMicro = inX;
+    case 'F':  // Car Forward Command
+      FcarSpeed(inX);
       break;
+    case 'B':  // Car Backward Command
+      RcarSpeed(inX);
     case 'R':
       // Set direction servo and camera servo to 
       //parameter in the right direction
@@ -107,10 +151,6 @@ void loop() {
       // Set direction servo and camera servo to 
       //parameter in the left direction
       turnServo.write(90+inX);
-      break;
-
-    case 'B':
-      // Stop Car, then set reverse speed to given parameter
       break;
 
     case 'A':
@@ -127,16 +167,27 @@ void loop() {
 
     command = "";
     commandComplete = false;
-  }
-  if (digitalRead(led)==HIGH)
-  {
-    digitalWrite(led,LOW);
-  }
-  else
-  {
-    digitalWrite(led,HIGH);
+    if (ACSR & (1<<ACO))    // check status of comparator output flag
+    {
+      if (led==HIGH)
+      {
+        currentSpeed = calcSpeed(lastHigh,lastLow);
+      }
+      else
+      {
+        currentSpeed = calcSpeed(lastLow,lastHigh);
+      }
+    }
   }
 
+}
+
+float calcSpeed(long beginTime, long endTime)
+{
+  long passedTime = endTime-beginTime;
+  passedTime = passedTime/1000;
+  return 1/(passedTime);
+  
 }
 
 void serialEvent() {
@@ -149,5 +200,15 @@ void serialEvent() {
   }
 }
 
-
+ISR(ANALOG_COMP_vect) {
+  if (digitalRead(led)==HIGH){
+    digitalWrite(led,LOW);
+    lastHigh = millis();
+  }
+  else
+  {
+    digitalWrite(led,HIGH);
+    lastLow = millis();
+  }
+}
 

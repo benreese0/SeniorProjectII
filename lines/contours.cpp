@@ -31,15 +31,16 @@ using namespace std;
 Mat src, src_gray, img;
 int thresh = 150;
 int max_thresh = 255;
- 
+
+const unsigned buffSize = 4*(2^20);
 /// Function header
 //void thresh_callback(int, void* );
  
 /** @function main */
-int main(int argc, char **argv)
+int main(void)
 {
     int sockfd, newsockfd, portno, clilen, n;
-    char buffer[256];
+    char buffer[buffSize];
     struct sockaddr_in serv_addr, cli_addr;
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,7 +65,6 @@ int main(int argc, char **argv)
     * go in sleep mode and will wait for the incoming connection
     */
     listen(sockfd,5);
-    clilen = sizeof(cli_addr);
     
     /* Accept actual connection from the client */
     newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, (unsigned int *)&clilen);
@@ -73,9 +73,10 @@ int main(int argc, char **argv)
         perror("ERROR on accept");
         exit(1);
     }
+    clilen = sizeof(cli_addr);
     /* If connection is established then start communicating */
-    bzero(buffer,256);
-    n = read( newsockfd,buffer,255 );
+    bzero(buffer,buffSize);
+    n = read( newsockfd,buffer,buffSize);
     if (n < 0)
     {
         perror("ERROR reading from socket");
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
     // store the video to a string
 	  //string filename = "cameraTestwithTime.mp4";
  
-    //   VideoCapture cap(filename);
+    VideoCapture cap(newsockfd);
  
 	   // create a matrix
        Mat camera;
@@ -149,7 +150,7 @@ int main(int argc, char **argv)
  
               if (contours.size() > 0) {
  
-                     for( int i = 0; i< contours.size(); i++ )
+                     for( unsigned i = 0; i< contours.size(); i++ )
                            {
                            //Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
                            drawContours( drawing, contours, i, Scalar(128,255,255), 2, 8, hierarchy, 0, Point() );

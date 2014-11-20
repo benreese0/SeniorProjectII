@@ -2,9 +2,9 @@ CFLAGS= `pkg-config --cflags opencv` -Wall -Wextra
 LIBS= `pkg-config --libs opencv`
 CC= g++
 
-all: countours
+all: contours
 
-countours: contours.cpp
+contours: contours.cpp
 		$(CC) $(CFLAGS) $(LIBS) $? -o $@
 			
 .PHONY:clean
@@ -12,3 +12,7 @@ countours: contours.cpp
 clean:
 	rm main
 
+.PHONY:test
+
+test:all
+	./contours

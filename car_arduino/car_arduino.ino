@@ -8,8 +8,10 @@
 
 // Pins and Variables
 
+// Variables
 Servo turnServo;
 Servo speedServo;
+Servo camServo;
 String command = "";
 boolean commandComplete = false;
 boolean turn = true;
@@ -17,25 +19,31 @@ char comm = ' ';
 int inX = 0;
 int currentMicro = 1500;
 int currentAngle = 90;
-int led = 13;
-int rightIRSensor = 2;
-int leftIRSensor = 3;
 int rightValue = 0;
 int leftValue = 0;
-int compStandard = A0;
-int speedSensor = A1;
 int compVal = 0;
 int speedVal = 0;
 unsigned long lastHigh = 0;
 unsigned long lastLow = 0;
 float currentSpeed = 0;
 
+// Pin Assignments
+int led = 13;
+int rightIRSensor = 2;
+int leftIRSensor = 3;
+int compStandard = A0;
+int speedSensor = A1;
+
+
+
 
 void setup() {
   Serial.begin(9600);
   command.reserve(200); 
   turnServo.attach(9);
+  camServo.attach(10);
   speedServo.attach(11,1000,2000);
+  
   pinMode(led,OUTPUT);
   analogRead(rightIRSensor);
   analogRead(leftIRSensor);
@@ -43,7 +51,7 @@ void setup() {
   analogRead(speedVal);
   speedServo.writeMicroseconds(1475);
   currentMicro = 1475;
-  ACSR =
+/*  ACSR =
    (0 << ACD) |    // Analog Comparator: Enabled
    (0 << ACBG) |   // Analog Comparator Bandgap Select: AIN0 is applied to the positive input
    (0 << ACO) |    // Analog Comparator Output: Off
@@ -51,7 +59,7 @@ void setup() {
    (1 << ACIE) |   // Analog Comparator Interrupt: Enabled
    (0 << ACIC) |   // Analog Comparator Input Capture: Disabled
    (1 << ACIS1) | (1 << ACIS0);   // Analog Comparator Interrupt Mode: Comparator Interrupt on Rising Output Edge
-
+*/
   
 }
 
@@ -70,7 +78,7 @@ void stopCar() {
 }
 
 void FcarSpeed(int newSpeed){
-  if (currentMicro <1580 && newSpeed<1580){
+  if (currentMicro <1580 && newSpeed<=1580){
     speedServo.writeMicroseconds(1580);
     delay(50);
     speedServo.writeMicroseconds(newSpeed);
@@ -114,24 +122,23 @@ void loop() {
 
   // Assumptions - name of the char will be comm
   // name of the parameter will be inX
-  rightValue = analogRead(rightIRSensor);
+//  rightValue = analogRead(rightIRSensor);
   leftValue = analogRead(leftIRSensor);
-  if (rightValue>thresholdVal || leftValue>thresholdVal)
+//  if (rightValue>thresholdVal || leftValue>thresholdVal)
+  if (leftValue>thresholdVal)
   {
+    Serial.print("S");
     stopCar();
     delay(500);
-    while(rightValue>75 && leftValue>75){
-      Serial.println(rightValue);
-      rightValue = analogRead(rightIRSensor);
+    while(leftValue>75){
       leftValue = analogRead(leftIRSensor);
     }
+    Serial.print("G");
   }
   else if (commandComplete){
     comm = command[0];
     command = command.substring(1);
     inX = command.toInt();
-    Serial.println(comm);
-    Serial.println(inX);
     switch (comm) {
     case 'S':  // Stop Car         
       stopCar();
@@ -145,12 +152,14 @@ void loop() {
       // Set direction servo and camera servo to 
       //parameter in the right direction
       turnServo.write(90-inX);
+      camServo.write(90+inX);
       break;
 
     case 'L':
       // Set direction servo and camera servo to 
       //parameter in the left direction
       turnServo.write(90+inX);
+      camServo.write(90-inX);
       break;
 
     case 'A':
@@ -167,7 +176,7 @@ void loop() {
 
     command = "";
     commandComplete = false;
-    if (ACSR & (1<<ACO))    // check status of comparator output flag
+/*    if (ACSR & (1<<ACO))    // check status of comparator output flag; if set, then check the speed
     {
       if (led==HIGH)
       {
@@ -179,9 +188,11 @@ void loop() {
       }
     }
   }
-
+*/
+}
 }
 
+// Command to determine speed based on 1 revolution between beginTime and endTime
 float calcSpeed(long beginTime, long endTime)
 {
   long passedTime = endTime-beginTime;
@@ -190,6 +201,8 @@ float calcSpeed(long beginTime, long endTime)
   
 }
 
+
+// This command is simply to find anything in the Serial buffer and read it as a command
 void serialEvent() {
   while (Serial.available()) {
     char inChar = char(Serial.read());
@@ -200,7 +213,9 @@ void serialEvent() {
   }
 }
 
-ISR(ANALOG_COMP_vect) {
+// Interrupt - Store the last time there was a high or low. 
+// Helps to determine the speed of the car
+/*ISR(ANALOG_COMP_vect) {
   if (digitalRead(led)==HIGH){
     digitalWrite(led,LOW);
     lastHigh = millis();
@@ -210,5 +225,5 @@ ISR(ANALOG_COMP_vect) {
     digitalWrite(led,HIGH);
     lastLow = millis();
   }
-}
+}*/
 

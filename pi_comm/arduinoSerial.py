@@ -18,14 +18,15 @@ sources_static = [ctrl_srv, arduino]
 sources_net = []
 while True:
  try:
-  inrdy, outrdy, errrdy = select.select(sources_static+sources_net,[],[])
+  inrdy, outrdy, errdy = select.select(sources_static+sources_net,[],[])
   for src in errdy:#handle errors first
    src.close()
+   print("removing cliet" + str(src.getpeername()))
    sources_net.remove(src)
   for src in inrdy:
    if src == ctrl_srv: #new connection made
     new_client, addr = ctrl_srv.accept()
-    sources_net.append(client)
+    sources_net.append(new_client)
     print("new client added: " + str(addr))    
    elif src == arduino:#data from Arduino
     data = arduino.read(1024)

@@ -65,7 +65,7 @@ void setup() {
 
 void stopCar() {
    Serial.print(currentMicro);
-  if (currentMicro>1500)
+  if (currentMicro>=1480)
       {
         speedServo.writeMicroseconds(1000);
         currentMicro = 1000;
@@ -127,10 +127,10 @@ void loop() {
 //  if (rightValue>thresholdVal || leftValue>thresholdVal)
   if (leftValue>thresholdVal)
   {
-    Serial.print("S");
     stopCar();
+    Serial.print("S");
     delay(500);
-    while(leftValue>75){
+    while(leftValue>80){
       leftValue = analogRead(leftIRSensor);
     }
     Serial.print("G");
@@ -148,6 +148,7 @@ void loop() {
       break;
     case 'B':  // Car Backward Command
       RcarSpeed(inX);
+      break;
     case 'R':
       // Set direction servo and camera servo to 
       //parameter in the right direction

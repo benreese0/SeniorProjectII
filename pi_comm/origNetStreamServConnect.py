@@ -10,7 +10,7 @@ client_socket = socket.socket()
 client_socket.connect(('192.168.1.4', 8000))
 
 # Accept a single connection and make a file-like object out of it
-connection = client_socket.accept()[0].makefile('w+b')
+connection = client_socket.makefile('rb')
 try:
     while True:
         # Read the length of the image as a 32-bit unsigned int. If the

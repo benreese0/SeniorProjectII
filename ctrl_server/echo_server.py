@@ -29,7 +29,7 @@ sources = [pi_img, pi_cmd, img_sock, ctrl_sock]
 
 while True:
  try:
-  inrdy, outrdy, errdy = select.select(sources_static+sources_net,[],[])
+  inrdy, outrdy, errdy = select.select(sources,[],[])
   for src in inrdy:
    if src == pi_img: #new image from pi
     data = pi_img.recv(fourmb)

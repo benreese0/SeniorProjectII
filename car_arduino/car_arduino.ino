@@ -49,8 +49,8 @@ void setup() {
   analogRead(leftIRSensor);
   analogRead(compStandard);
   analogRead(speedVal);
-  speedServo.writeMicroseconds(1475);
-  currentMicro = 1475;
+  speedServo.writeMicroseconds(1480);
+  currentMicro = 1480;
 /*  ACSR =
    (0 << ACD) |    // Analog Comparator: Enabled
    (0 << ACBG) |   // Analog Comparator Bandgap Select: AIN0 is applied to the positive input
@@ -65,7 +65,7 @@ void setup() {
 
 void stopCar() {
    Serial.print(currentMicro);
-  if (currentMicro>=1480)
+  if (currentMicro>=1510)
       {
         speedServo.writeMicroseconds(1000);
         currentMicro = 1000;
@@ -84,7 +84,7 @@ void FcarSpeed(int newSpeed){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else if (currentMicro<1480 && newSpeed>1580){
+  else if (currentMicro<1580 && newSpeed>1580){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
@@ -97,7 +97,7 @@ void FcarSpeed(int newSpeed){
 void RcarSpeed(int newSpeed){
   if (currentMicro > 1480 && newSpeed<1480){
     speedServo.writeMicroseconds(1200);
-    delay(500);
+    delay(1000);
     speedServo.writeMicroseconds(1480);
     delay(100);
     speedServo.writeMicroseconds(newSpeed);

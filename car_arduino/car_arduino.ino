@@ -91,6 +91,11 @@ void FcarSpeed(int newSpeed){
   else if (newSpeed<1480){
     Serial.print("E\n");
   }
+  else
+  {
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
   
 }
 
@@ -103,7 +108,7 @@ void RcarSpeed(int newSpeed){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else if (currentMicro < 1480 && newSpeed<1480){
+  else if (currentMicro <= 1480 && newSpeed<1480){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }

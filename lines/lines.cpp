@@ -17,7 +17,8 @@
 #include <string>
 #include <vector>
 #include <math.h>
- 
+
+#include <fstream>
 
 // socket libraries
 #include <unistd.h>
@@ -36,12 +37,15 @@ int max_thresh = 255;
 /** @function main */
 int main(void)
 {
-    int sockfd, newsockfd, portno, n;
+    int sockfd, newsockfd, portno;
+		int nread =0;
+		int n;
     char * imgBuff;
     vector <char> imgVec;
-    
+	
+		fstream fs;
+		fs.open("file.jpeg", fstream::out | fstream::binary);		
     struct sockaddr_in serv_addr;
-    
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd <0)
@@ -80,7 +84,7 @@ int main(void)
 				//read in size of next image
         read(newsockfd,&n,sizeof(n));
         cout << "n:" << n << endl;
-        if (n < 0)
+        if (n < 1)
         {
           perror("ERROR reading from socket");
           exit(1);
@@ -88,14 +92,21 @@ int main(void)
 
         // allocate buffer size
         imgBuff = new char [n]; 
-				cout << "imgBuff:" <<*imgBuff<<endl;
-        read(newsockfd, &imgBuff, n);
+				
+				while(nread < n){
+       	 nread += read(newsockfd, (imgBuff+nread), n-nread);
+			 }
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
 				imgVec.assign(imgBuff, imgBuff+n);
-
-				cout << "after assign" << endl;
-        og = imdecode(imgVec, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
+				for (int i =0; i<n; ++i){
+				 fs<< imgBuff[i];
+				}
+				fs.close();
+						
+				cout << "vector size:" << imgVec.size() << endl;
+				cout << "imgbuff:" << (int *)imgBuff << " end:" << (int *)(imgBuff+n)<<endl;
+        imdecode(imgVec, CV_LOAD_IMAGE_GRAYSCALE, &og);  // decoding image from buffer
 	      // can try not including the image color part or making it grayscale
         
         // de-allocate buffer

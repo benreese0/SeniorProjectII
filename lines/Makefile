@@ -1,4 +1,4 @@
-CFLAGS= `pkg-config --cflags opencv` -Wall -Wextra 
+CFLAGS= `pkg-config --cflags opencv` -Wall -Wextra -gstabs
 LIBS= `pkg-config --libs opencv`
 CC= g++
 

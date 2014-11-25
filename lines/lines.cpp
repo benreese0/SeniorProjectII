@@ -103,7 +103,7 @@ int main(void)
         // de-allocate buffer
         delete[] imgBuff;
 				if(og.empty()){
-					cout << "IT's EMPTY!!" << endl;}
+					cout << "OG EMPTY!!" << endl;}
         //time_t now = clock();
  
 		    double xcrop, ycrop;
@@ -112,43 +112,49 @@ int main(void)
 		      
         Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
         src = og(ROI);
+				if(src.empty()){
+					cout << "SRC EMPTY!!" << endl;}
         //cvtColor(src, src_gray, CV_RGB2GRAY);
-				src_gray.copyTo(src);
-        cout << "Am i here?" << endl;
+				src.copyTo(src_gray);
  
           //imshow ("src", src);
  
         GaussianBlur(src_gray, src_gray, Size(9,9),0,0);
  
 			  Mat canny_output;
-              vector<vector<Point> > contours;
-              vector<Vec4i> hierarchy;
-              vector<float> lines;
-              std::vector<cv::Point2f> corners, left, right, final;
-              
-              /// Detect edges using canny
-              Canny( src_gray, canny_output, thresh, thresh*2, 3 );
-              /// Find contours
-              findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
- 
-              /// Draw contours
-              Mat img1 = Mat::zeros( canny_output.size(), CV_8UC3 );
-              Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
- 
-              //cout << "Size Contours: " << contours.size() << endl;
- 
-              if (contours.size() > 0) {
- 
-                     for( unsigned i = 0; i< contours.size(); i++ )
-                           {
-                           //Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                           drawContours( drawing, contours, i, Scalar(128,255,255), 2, 8, hierarchy, 0, Point() );
-                           }
- 
-                     //fitLine (contours[0], lines, CV_DIST_HUBER, 0, 0.01, 0.01);
-                     fitLine (contours[0], lines, CV_DIST_HUBER, 0, 0.01, 0.01);
-                     //cout << "lines: " << lines[0] << " "<< lines[1] << " "<< lines[2] << " " << lines[3] << endl;
-                     int lefty = (-lines[2]*lines[1]/lines[0])+lines[3];
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        vector<float> lines;
+        std::vector<cv::Point2f> corners, left, right, final;
+        
+        /// Detect edges using canny
+        Canny( src_gray, canny_output, thresh, thresh*2, 3 );
+				if(canny_output.empty()){
+					cout << "canny EMPTY!!" << endl;}
+        /// Find contours
+        cout << "Am i here?1" << endl;
+				imshow("window",canny_output);
+        findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+        cout << "Am i here?2" << endl;
+        /// Draw contours
+        Mat img1 = Mat::zeros( canny_output.size(), CV_8UC3 );
+        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+
+        //cout << "Size Contours: " << contours.size() << endl;
+
+        if (contours.size() > 0) {
+
+               for( unsigned i = 0; i< contours.size(); i++ )
+                     {
+                     //Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+                     drawContours( drawing, contours, i, Scalar(128,255,255), 2, 8, hierarchy, 0, Point() );
+                     }
+
+               //fitLine (contours[0], lines, CV_DIST_HUBER, 0, 0.01, 0.01);
+               fitLine (contours[0], lines, CV_DIST_HUBER, 0, 0.01, 0.01);
+               //cout << "lines: " << lines[0] << " "<< lines[1] << " "<< lines[2] << " " << lines[3] << endl;
+               int lefty = (-lines[2]*lines[1]/lines[0])+lines[3];
                      int righty = ((src_gray.cols-lines[2])*lines[1]/lines[0])+lines[3];
                      line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
  

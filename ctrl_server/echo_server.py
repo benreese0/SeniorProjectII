@@ -7,7 +7,7 @@ import select
 cmd_port = 7777
 img_port = 12345
 pi_addr = '192.168.1.4'
-img_addr = '192.168.1.2'
+img_addr = '192.168.1.3'
 ctrl_addr = '192.168.1.3'
 fourmb = 1024*1024*4
 

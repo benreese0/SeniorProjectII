@@ -16,11 +16,8 @@ try:
         # Read the length of the image as a 32-bit unsigned int. If the
         # length is zero, quit the loop
         image_len = struct.unpack('<L', connection.read(struct.calcsize('<L')))
-        print ("len:" + str(image_len))
-        image_len = image_len[0]
-        print ("len[0]:" + str(image_len))
-
-
+        image_len = image_len[0] #remove the length from a list
+        print ("image len:" + str(image_len))
         if not image_len:
             break
         # Construct a stream to hold the image data and read the image

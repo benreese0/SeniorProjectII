@@ -33,14 +33,14 @@ int thresh = 150;
 int max_thresh = 255;
 
 const unsigned buffSize = 4*(2^20);
-vector <char> data;
+vector <char> imgVec;
  
 /** @function main */
 int main(void)
 {
     int sockfd, newsockfd, portno, clilen, n;
     char buffer[buffSize]; 
-    char *newBuff;
+    char *imgBuff;
     
     struct sockaddr_in serv_addr, cli_addr;
     
@@ -81,26 +81,28 @@ int main(void)
     /* If connection is established then start communicating */
     while (1) {
         bzero(buffer,buffSize);
-        n = read(newsockfd,buffer,buffSize);
+				//read in size of next image
+        read(newsockfd,&n,sizeof(n));
         cout << "n: " << n << endl;
         if (n < 0)
         {
           perror("ERROR reading from socket");
           exit(1);
         }
-        printf("Here is the message: %s: \n",buffer);
 
-        // read in size, then have a new buff 
-        read(newsockfd,newBuff,n);
-        newBuff = new char [n]; 
+        // allocate buffer size
+        imgBuff = new char [n]; 
+        read(newsockfd, &imgBuff, n);
+        printf("Here is the message: %s\n",buffer);
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
+				imgVec.assign(imgBuff, imgBuff+n);
 
-        og = imdecode(newBuff, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
+        og = imdecode(imgVec, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
 	      // can try not including the image color part or making it grayscale
         
-        // delete pointer
-        delete[] newBuff;
+        // de-allocate buffer
+        delete[] imgBuff;
 
         //time_t now = clock();
  

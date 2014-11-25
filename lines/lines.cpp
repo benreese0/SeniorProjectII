@@ -32,17 +32,15 @@ Mat og, src, src_gray, img;
 int thresh = 150;
 int max_thresh = 255;
 
-const unsigned buffSize = 4*(2^20);
-vector <char> imgVec;
  
 /** @function main */
 int main(void)
 {
-    int sockfd, newsockfd, portno, clilen, n;
-    char buffer[buffSize]; 
-    char *imgBuff;
+    int sockfd, newsockfd, portno, n;
+    char * imgBuff;
+    vector <char> imgVec;
     
-    struct sockaddr_in serv_addr, cli_addr;
+    struct sockaddr_in serv_addr;
     
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -67,23 +65,21 @@ int main(void)
     * go in sleep mode and will wait for the incoming connection
     */
     listen(sockfd,5);
-    
-    /* Accept actual connection from the client */
-    newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, (unsigned int *)&clilen);
+    cout << "Listening\n" << endl;
+    /* Accept connection from any client */
+    newsockfd = accept(sockfd, NULL, NULL);
     if (newsockfd < 0) 
     {
         perror("ERROR on accept");
         exit(1);
     }
-    clilen = sizeof(cli_addr);
-    
-    write(newsockfd, "testing", 8);
+    cout << "Accepted connection" << endl;
+    //write(newsockfd, "testing", 8);
     /* If connection is established then start communicating */
     while (1) {
-        bzero(buffer,buffSize);
 				//read in size of next image
         read(newsockfd,&n,sizeof(n));
-        cout << "n: " << n << endl;
+        cout << "n:" << n << endl;
         if (n < 0)
         {
           perror("ERROR reading from socket");
@@ -92,12 +88,13 @@ int main(void)
 
         // allocate buffer size
         imgBuff = new char [n]; 
+				cout << "imgBuff:" <<*imgBuff<<endl;
         read(newsockfd, &imgBuff, n);
-        printf("Here is the message: %s\n",buffer);
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
 				imgVec.assign(imgBuff, imgBuff+n);
 
+				cout << "after assign" << endl;
         og = imdecode(imgVec, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
 	      // can try not including the image color part or making it grayscale
         

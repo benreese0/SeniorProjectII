@@ -43,8 +43,6 @@ int main(void)
     char * imgBuff;
     vector <char> imgVec;
 	
-		fstream fs;
-		fs.open("file.jpeg", fstream::out | fstream::binary);		
     struct sockaddr_in serv_addr;
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -99,19 +97,13 @@ int main(void)
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
 				imgVec.assign(imgBuff, imgBuff+n);
-				for (int i =0; i<n; ++i){
-				 fs<< imgBuff[i];
-				}
-				fs.close();
 						
-				cout << "vector size:" << imgVec.size() << endl;
-				cout << "imgbuff:" << (int *)imgBuff << " end:" << (int *)(imgBuff+n)<<endl;
         imdecode(imgVec, CV_LOAD_IMAGE_GRAYSCALE, &og);  // decoding image from buffer
 	      // can try not including the image color part or making it grayscale
-        
         // de-allocate buffer
         delete[] imgBuff;
-
+				if(og.empty()){
+					cout << "IT's EMPTY!!" << endl;}
         //time_t now = clock();
  
 		    double xcrop, ycrop;
@@ -120,7 +112,9 @@ int main(void)
 		      
         Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
         src = og(ROI);
-        cvtColor(src, src_gray, CV_RGB2GRAY);
+        //cvtColor(src, src_gray, CV_RGB2GRAY);
+				src_gray.copyTo(src);
+        cout << "Am i here?" << endl;
  
           //imshow ("src", src);
  

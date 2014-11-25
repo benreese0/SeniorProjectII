@@ -20,4 +20,4 @@ clean:
 .PHONY:test
 
 test:all
-	./contours
+	./lines

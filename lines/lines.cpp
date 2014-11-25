@@ -17,7 +17,8 @@
 #include <string>
 #include <vector>
 #include <math.h>
- 
+
+#include <fstream>
 
 // socket libraries
 #include <unistd.h>
@@ -32,18 +33,19 @@ Mat og, src, src_gray, img;
 int thresh = 150;
 int max_thresh = 255;
 
-const unsigned buffSize = 4*(2^20);
-vector <char> data;
  
 /** @function main */
 int main(void)
 {
-    int sockfd, newsockfd, portno, clilen, n;
-    char buffer[buffSize]; 
-    char *newBuff;
-    
-    struct sockaddr_in serv_addr, cli_addr;
-    
+    int sockfd, newsockfd, portno;
+		int nread =0;
+		int n;
+    char * imgBuff;
+    vector <char> imgVec;
+	
+		fstream fs;
+		fs.open("file.jpeg", fstream::out | fstream::binary);		
+    struct sockaddr_in serv_addr;
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd <0)
@@ -67,40 +69,48 @@ int main(void)
     * go in sleep mode and will wait for the incoming connection
     */
     listen(sockfd,5);
-    
-    /* Accept actual connection from the client */
-    newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, (unsigned int *)&clilen);
+    cout << "Listening\n" << endl;
+    /* Accept connection from any client */
+    newsockfd = accept(sockfd, NULL, NULL);
     if (newsockfd < 0) 
     {
         perror("ERROR on accept");
         exit(1);
     }
-    clilen = sizeof(cli_addr);
-    
-    write(newsockfd, "testing", 8);
+    cout << "Accepted connection" << endl;
+    //write(newsockfd, "testing", 8);
     /* If connection is established then start communicating */
     while (1) {
-        bzero(buffer,buffSize);
-        n = read(newsockfd,buffer,buffSize);
-        cout << "n: " << n << endl;
-        if (n < 0)
+				//read in size of next image
+        read(newsockfd,&n,sizeof(n));
+        cout << "n:" << n << endl;
+        if (n < 1)
         {
           perror("ERROR reading from socket");
           exit(1);
         }
-        printf("Here is the message: %s: \n",buffer);
 
-        // read in size, then have a new buff 
-        read(newsockfd,newBuff,n);
-        newBuff = new char [n]; 
+        // allocate buffer size
+        imgBuff = new char [n]; 
+				
+				while(nread < n){
+       	 nread += read(newsockfd, (imgBuff+nread), n-nread);
+			 }
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
-
-        og = imdecode(newBuff, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
+				imgVec.assign(imgBuff, imgBuff+n);
+				for (int i =0; i<n; ++i){
+				 fs<< imgBuff[i];
+				}
+				fs.close();
+						
+				cout << "vector size:" << imgVec.size() << endl;
+				cout << "imgbuff:" << (int *)imgBuff << " end:" << (int *)(imgBuff+n)<<endl;
+        imdecode(imgVec, CV_LOAD_IMAGE_GRAYSCALE, &og);  // decoding image from buffer
 	      // can try not including the image color part or making it grayscale
         
-        // delete pointer
-        delete[] newBuff;
+        // de-allocate buffer
+        delete[] imgBuff;
 
         //time_t now = clock();
  

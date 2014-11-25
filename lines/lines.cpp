@@ -41,6 +41,7 @@ int main(void)
 		int nread =0;
 		int n;
     char * imgBuff;
+		time_t t_val;
     vector <char> imgVec;
 	
     struct sockaddr_in serv_addr;
@@ -80,8 +81,9 @@ int main(void)
     /* If connection is established then start communicating */
     while (1) {
 				//read in size of next image
+				t_val = time(0);
+
         read(newsockfd,&n,sizeof(n));
-        cout << "n:" << n << endl;
         if (n < 1)
         {
           perror("ERROR reading from socket");
@@ -90,10 +92,13 @@ int main(void)
 
         // allocate buffer size
         imgBuff = new char [n]; 
-				
+				nread = 0;	
 				while(nread < n){
        	 nread += read(newsockfd, (imgBuff+nread), n-nread);
 			 }
+				//cout << "Network time:" << ((float)(clock() - now))/CLOCKS_PER_SEC<<endl;
+				//now = clock();
+
         /* ******** start deleting this ********* */
         // need to start porting the video into this 
 				imgVec.assign(imgBuff, imgBuff+n);
@@ -104,8 +109,9 @@ int main(void)
         delete[] imgBuff;
 				if(og.empty()){
 					cout << "OG EMPTY!!" << endl;}
-        //time_t now = clock();
- 
+
+ 				//imshow("og", og);
+
 		    double xcrop, ycrop;
 			  xcrop = 6.5/8;
 			  ycrop = 3.0/5;
@@ -132,11 +138,9 @@ int main(void)
 				if(canny_output.empty()){
 					cout << "canny EMPTY!!" << endl;}
         /// Find contours
-        cout << "Am i here?1" << endl;
-				imshow("window",canny_output);
+				//imshow("Cany_output",canny_output);
         findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-        cout << "Am i here?2" << endl;
         /// Draw contours
         Mat img1 = Mat::zeros( canny_output.size(), CV_8UC3 );
         Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
@@ -158,7 +162,8 @@ int main(void)
                      int righty = ((src_gray.cols-lines[2])*lines[1]/lines[0])+lines[3];
                      line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
  
-                     double theta = atan((lines[1])/(lines[0])) * 57.2957795 - 31; // final factor converts from radians to degress and shifts for perspective
+                     double theta = atan((lines[1])/(lines[0])) * 57.2957795 - 31; 
+										 // final factor converts from radians to degress and shifts for perspective
 					 
 					 double m, b, xsmall, Xsmall, d;
 					 m = lines[1]/lines[2];
@@ -186,16 +191,17 @@ int main(void)
  
                      //waitKey(20);
                      //imshow("vertices",img1);
-              }
+         }
+				else{
+								cout << "No Contours Found" << endl;
+				}
  
        //imshow ("img", src);
        //imshow("original", og);
        //waitKey(20);
-      
-        
+       cout << "end:\t"<< time(0)-t_val << endl;
        }
  
-       waitKey(20);
        close(newsockfd);
        close(sockfd);
 }

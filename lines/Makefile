@@ -5,10 +5,10 @@ CC= g++
 all: lines
 
 lines: lines.cpp
-		$(CC) $(CFLAGS) $(LIBS) $? -o $@
+		$(CC) $(CFLAGS) $? $(LIBS) -o $@
 			
 contours: contours.cpp
-		$(CC) $(CFLAGS) $(LIBS) $? -o $@
+		$(CC) $(CFLAGS) $? $(LIBS) -o $@
 			
 .PHONY:clean
 

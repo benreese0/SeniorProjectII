@@ -33,13 +33,17 @@ int thresh = 150;
 int max_thresh = 255;
 
 const unsigned buffSize = 4*(2^20);
+vector <char> data;
  
 /** @function main */
 int main(void)
 {
     int sockfd, newsockfd, portno, clilen, n;
-    char buffer[buffSize];
+    char buffer[buffSize]; 
+    char *newBuff;
+    
     struct sockaddr_in serv_addr, cli_addr;
+    
     // sockaddr_in = struct containing int addr  
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd <0)
@@ -72,50 +76,45 @@ int main(void)
         exit(1);
     }
     clilen = sizeof(cli_addr);
+    
+    write(newsockfd, "testing", 8);
     /* If connection is established then start communicating */
-    bzero(buffer,buffSize);
-    n = read( newsockfd,buffer,buffSize);
-    if (n < 0)
-    {
-        perror("ERROR reading from socket");
-        exit(1);
-    }
-    printf("Here is the message: %s\n",buffer);
+    while (1) {
+        bzero(buffer,buffSize);
+        n = read(newsockfd,buffer,buffSize);
+        cout << "n: " << n << endl;
+        if (n < 0)
+        {
+          perror("ERROR reading from socket");
+          exit(1);
+        }
+        printf("Here is the message: %s: \n",buffer);
 
-    /* Write a response to the client */
-    n = write(newsockfd,"I got your message",18);
-    if (n < 0)
-    {
-        perror("ERROR writing to socket");
-        exit(1);
-    }
+        // read in size, then have a new buff 
+        read(newsockfd,newBuff,n);
+        newBuff = new char [n]; 
+        /* ******** start deleting this ********* */
+        // need to start porting the video into this 
 
-    /* ******** start deleting this ********* */
-    // need to start porting the video into this 
+        og = imdecode(newBuff, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
+	      // can try not including the image color part or making it grayscale
+        
+        // delete pointer
+        delete[] newBuff;
 
-    // store the video to a string
-	  //string filename = "cameraTestwithTime.mp4";
+        //time_t now = clock();
  
-	   // create a matrix
- 
-       og = imdecode(newsockfd, CV_LOAD_IMAGE_COLOR);  // decoding image from buffer
-	   // can try not including the image color part or making it grayscale
- 
-       while (1) {
- 
-              //time_t now = clock();
- 
-		      double xcrop, y crop;
+		    double xcrop, ycrop;
 			  xcrop = 6.5/8;
 			  ycrop = 3.0/5;
 		      
-              Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
-              src = og(ROI);
-              cvtColor(src, src_gray, CV_RGB2GRAY);
+        Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
+        src = og(ROI);
+        cvtColor(src, src_gray, CV_RGB2GRAY);
  
-              //imshow ("src", src);
+          //imshow ("src", src);
  
-              GaussianBlur(src_gray, src_gray, Size(9,9),0,0);
+        GaussianBlur(src_gray, src_gray, Size(9,9),0,0);
  
 			  Mat canny_output;
               vector<vector<Point> > contours;
@@ -160,15 +159,19 @@ int main(void)
 
 					 d = Xsmall - og.cols/2;
 
+          char result[10];
 					 if (theta >= 0){
 						 cout << "L" << theta << endl;
-						 //cout << "Dist: " << d << endl;
+						 cout << "Dist: " << d << endl;
+             sprintf(result,"L%f\n", theta);
+             write(newsockfd,result,10);
 					 }
 					 else {
 						 cout << "R" << theta << endl;
-						 //cout << "Dist: " << d << endl;
+						 cout << "Dist: " << d << endl;
+             sprintf(result,"R%f\n", (-1.0)*theta);
+             write(newsockfd,result,10);
 					 }
- 
                      //imshow("Contours", drawing);
  
                      //waitKey(20);
@@ -178,6 +181,8 @@ int main(void)
        //imshow ("img", src);
        //imshow("original", og);
        //waitKey(20);
+      
+        
        }
  
        waitKey(20);

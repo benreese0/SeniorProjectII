@@ -158,14 +158,14 @@ void loop() {
       // Set direction servo and camera servo to 
       //parameter in the right direction
       turnServo.write(90-inX);
-      camServo.write(90+inX);
+      camServo.write(90-inX);
       break;
 
     case 'L':
       // Set direction servo and camera servo to 
       //parameter in the left direction
       turnServo.write(90+inX);
-      camServo.write(90-inX);
+      camServo.write(90+inX);
       break;
 
     case 'A':

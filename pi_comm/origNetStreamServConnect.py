@@ -7,7 +7,7 @@ from PIL import Image
 # Start a socket listening for connections on 0.0.0.0:8000 (0.0.0.0 means
 # all interfaces)
 client_socket = socket.socket()
-client_socket.connect(('192.168.1.4', 8000))
+client_socket.connect(('192.168.1.4', 12345))
 
 # Accept a single connection and make a file-like object out of it
 connection = client_socket.makefile('rb')

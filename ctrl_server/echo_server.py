@@ -6,8 +6,8 @@ import select
 #constants
 cmd_port = 7777
 img_port = 12345
-pi_addr = '192.168.1.4'
-img_addr = '192.168.1.3'
+pi_addr = '192.168.1.7'
+img_addr = '192.168.1.6'
 ctrl_addr = '192.168.1.3'
 fourmb = 1024*1024*4
 
@@ -33,12 +33,16 @@ while True:
   for src in inrdy:
    if src == pi_img: #new image from pi
     data = pi_img.recv(fourmb)
+    #while data.length() >0: 
+     #   print("lenn" + str(data.len()))
     img_sock.sendall(data)
+      #  data = pi_img.recv(fourmb)
    elif src == pi_cmd:#data from pi
     data = pi_cmd.recv(1024)
-    print("Data from pi:" + str(data))
+    print("Arduino:" + str(data))
    elif src == img_sock:#cmd from img_proc
     data = img_sock.recv(1024)
+    print("IMGCMD:"+ str(data))
     pi_cmd.sendall(data)
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
@@ -49,10 +53,6 @@ while True:
  except KeyboardInterrupt:
   break
  except ConnectionRefusedError:
-  break
- finally:
-  for sock in sources:
-   sock.close()
   break
 print('Exiting')
 

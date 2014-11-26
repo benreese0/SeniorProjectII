@@ -51,15 +51,7 @@ void setup() {
   analogRead(speedVal);
   speedServo.writeMicroseconds(1480);
   currentMicro = 1480;
-/*  ACSR =
-   (0 << ACD) |    // Analog Comparator: Enabled
-   (0 << ACBG) |   // Analog Comparator Bandgap Select: AIN0 is applied to the positive input
-   (0 << ACO) |    // Analog Comparator Output: Off
-   (1 << ACI) |    // Analog Comparator Interrupt Flag: Clear Pending Interrupt
-   (1 << ACIE) |   // Analog Comparator Interrupt: Enabled
-   (0 << ACIC) |   // Analog Comparator Input Capture: Disabled
-   (1 << ACIS1) | (1 << ACIS0);   // Analog Comparator Interrupt Mode: Comparator Interrupt on Rising Output Edge
-*/
+
   
 }
 
@@ -78,18 +70,18 @@ void stopCar() {
 }
 
 void FcarSpeed(int newSpeed){
-  if (currentMicro <1580 && newSpeed<=1580){
+  if (newSpeed<1480){
+    Serial.print("E\n");
+  }
+  else if (currentMicro <1580 && newSpeed<=1580){
     speedServo.writeMicroseconds(1580);
     delay(50);
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else if (currentMicro<1580 && newSpeed>1580){
+  else if (currentMicro>=1580 && newSpeed>1580){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
-  }
-  else if (newSpeed<1480){
-    Serial.print("E\n");
   }
   else
   {
@@ -100,7 +92,10 @@ void FcarSpeed(int newSpeed){
 }
 
 void RcarSpeed(int newSpeed){
-  if (currentMicro > 1480 && newSpeed<1480){
+  if (newSpeed>1480){
+    Serial.print("E\n");
+  }
+  else if (currentMicro > 1480){
     speedServo.writeMicroseconds(1200);
     delay(1000);
     speedServo.writeMicroseconds(1480);
@@ -108,7 +103,7 @@ void RcarSpeed(int newSpeed){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else if (currentMicro <= 1480 && newSpeed<1480){
+  else if (currentMicro <= 1480){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
@@ -132,12 +127,13 @@ void loop() {
 //  if (rightValue>thresholdVal || leftValue>thresholdVal)
   if (leftValue>thresholdVal)
   {
+    Serial.println("O");
     stopCar();
-    Serial.print("S");
     delay(500);
     while(leftValue>80){
       leftValue = analogRead(leftIRSensor);
     }
+    while(Serial.read() != -1);
     Serial.print("G");
   }
   else if (commandComplete){

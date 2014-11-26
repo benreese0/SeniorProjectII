@@ -10,7 +10,7 @@ sign_port = 7779
 line_port = 7780
 pi_addr = '192.168.1.7'
 sign_addr = '192.168.1.6'
-linesign_addr = '192.168.1.6'
+line_addr = '192.168.1.6'
 ctrl_addr = '192.168.1.3'
 fourmb = 1024*1024*4
 
@@ -27,19 +27,18 @@ print("Ctrl connection made")
 sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sign_sock.connect( (img_addr, img_port) )
 print("Sign connection made")
+line_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+line_sock.connect( (img_addr, img_port) )
+print("Line connection made")
 
-sources = [pi_img, pi_cmd, img_sock, ctrl_sock]
+sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
 
 while True:
  try:
   inrdy, outrdy, errdy = select.select(sources,[],sources)
   for src in errdy:
-   if src == pi_cmd: #Arduino is out
-    pi_img.close()
-    ctrl_sock.close()
-    img_sock.close()
-
-    
+   for sock in sources:
+    sock.close()
 
   for src in inrdy:
    if src == pi_img: #new image from pi

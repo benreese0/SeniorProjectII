@@ -27,11 +27,12 @@
 using namespace cv;
 using namespace std;
 
-//int lowThreshold = 50; // 75
-int lowThreshold = 70;
+int lowThreshold = 50; // 75
+//int lowThreshold = 70;
 bool match = false;
 double H;
 Mat og, src, src_gray, img;
+
 string intToString(int number) {
 
     std::stringstream ss;
@@ -377,7 +378,7 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                         //cvtColor(correctedImg, correctedImgBin, CV_RGB2GRAY);
                         correctedImg.copyTo(correctedImgBin);
 
-                        imshow("correctedimgbin", correctedImgBin);
+                        //imshow("correctedimgbin", correctedImgBin);
 
                         threshold(correctedImgBin, correctedImgBin, 140, 255, 0);
 
@@ -406,19 +407,19 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                             if (i ==1){
                                 cout << "diff: " << diff << endl;
                             }
-                            /*if (diff < minDiff  && i == 0) {
+                            if (diff < minDiff  && i == 0) {
                             //minDiff = diff;
                             match = true;
                             str = "V1";
-                            }*/
+                            }
                             if (diff < minDiff  && i == 1) {
-                                cout << "Hi" << endl;
+                                //cout << "Hi" << endl;
                                 match = true;
                                 str = "V2";
                             }
                             imshow("diff", diffImg);
-                            imshow("act", new_image);
-                            waitKey(0);
+                            //imshow("act", new_image);
+                            //waitKey(0);
                         }
                     }
                 }
@@ -463,10 +464,9 @@ int readRefImages(Symbol *symbols) {
 }
 
 
-void CannyThreshold(int, void*) {
-}
+//void CannyThreshold(int, void*) {}
 
-int main(int argc, char** argv) {
+int main(void) {
     // for OpenCV general detection/matching framework details
 
     //VideoCapture cap;
@@ -475,7 +475,6 @@ int main(int argc, char** argv) {
     int nread = 0;
     int n;
     char * imgBuff;
-    time_t t_val;
     vector <char> imgVec;
     struct sockaddr_in serv_addr;
 
@@ -507,15 +506,14 @@ int main(int argc, char** argv) {
     Mat camera;
     Mat greyImg;
 
-    Symbol symbols[10];
+    Symbol symbols[5];
     if (readRefImages(symbols) == -1) {
         printf("Error reading reference symbols\n");
         return -1;
     }
 
-    createTrackbar("Min Threshold:", "A", &lowThreshold, 100, CannyThreshold);
+    //createTrackbar("Min Threshold:", "A", &lowThreshold, 100, CannyThreshold);
 
-    double t = (double) getTickCount();
 
     //cap >> camera;
 
@@ -535,11 +533,11 @@ int main(int argc, char** argv) {
         }
         imgVec.assign(imgBuff,imgBuff+n);
         imdecode(imgVec,CV_LOAD_IMAGE_GRAYSCALE, &og);
-        delete[] imgBuff;
         if(og.empty()){
             cout << "OG EMPTY!!" << endl;}
-        imshow("og",og);
-        waitKey(50);
+        imshow("og", og);
+        waitKey(2);
+        delete [] imgBuff;
 
 
 
@@ -557,7 +555,6 @@ int main(int argc, char** argv) {
         vector<Vec4i> hierarchy;
         og.copyTo(greyImg);
         GaussianBlur(greyImg, greyImg, Size(9, 9), 0, 0);
-
         /// Detect edges using canny
         Canny(greyImg, canny_output, lowThreshold, lowThreshold * 3, 3);
 
@@ -566,10 +563,9 @@ int main(int argc, char** argv) {
         /// Find contours
         findContours(canny_output, contours, hierarchy, CV_RETR_TREE,
                 CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-
         string result;
 
-        //result = yield(contours);
+        result = yield(contours);
 
         if (match != true){
             result = stop(contours);
@@ -601,9 +597,10 @@ int main(int argc, char** argv) {
                 //cout << "H " << d << endl;
             }
             char finalResult[10];
-            cout << result << d << endl;
+//            cout << result << d << endl;
             sprintf(finalResult,"%s%f\n",result.c_str(),d);
-            write(newsockfd,finalResult,6);
+            //write(newsockfd,finalResult,6);
+						cout << "results:" << finalResult << endl;
             printf("%f time\n",seconds/CLOCKS_PER_SEC);
             match = false;
             //}
@@ -611,11 +608,10 @@ int main(int argc, char** argv) {
             //imshow("A", camera);
 
             //system("pause");
+						}
 
-    }
-
-    close(newsockfd);
-    close(sockfd);
-    waitKey(0);
-}
+	}
+ close(newsockfd);
+ close(sockfd);
+ //waitKey(0);
 }

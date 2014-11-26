@@ -602,7 +602,7 @@ int main(int argc, char** argv) {
             }
             char finalResult[10];
             cout << result << d << endl;
-            sprintf(finalResult,"%s%f\n",result,d);
+            sprintf(finalResult,"%s%f\n",result.c_str(),d);
             write(newsockfd,finalResult,6);
             printf("%f time\n",seconds/CLOCKS_PER_SEC);
             match = false;

@@ -8,7 +8,8 @@ import picamera
 # Connect a client socket to my_server:8000 (change my_server to the
 # hostname of your server)
 client_socket = socket.socket()
-client_socket.connect(('192.168.1.6', 12345))
+client_socket.connect(('192.168.1.6', 7779))
+i=0
 
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
@@ -30,7 +31,8 @@ try:
             # Write the length of the capture to the stream and flush to
             # ensure it actually gets sent
             imgSize = stream.tell()
-            print("Imgsize:"+str( imgSize))
+            i=i+1
+            print("Img# " +str (i) + " size:"+str( imgSize))
             connection.write(struct.pack('<L', stream.tell()))
             connection.flush()
             # Rewind the stream and send the image data over the wire
@@ -46,6 +48,7 @@ try:
             f.close()
             stream.seek(0)
             stream.truncate()
+    #        print(client_socket.recv(1024))
     # Write a length of zero to the stream to signal we're done
     connection.write(struct.pack('<L', 0))
 finally:

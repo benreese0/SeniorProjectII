@@ -10,7 +10,7 @@ import picamera
 client_socket = socket.socket()
 client_socket.connect(('192.168.1.6', 7779))
 i=0
-
+ptime = 0;
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
 try:
@@ -33,6 +33,8 @@ try:
             imgSize = stream.tell()
             i=i+1
             print("Img# " +str (i) + " size:"+str( imgSize))
+            print("process time:" + str(time.time() - ptime))
+            ptime = time.time()
             connection.write(struct.pack('<L', stream.tell()))
             connection.flush()
             # Rewind the stream and send the image data over the wire

@@ -53,7 +53,7 @@ int main(void)
       exit(1);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
-    portno = 12345;
+    portno = 7780;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
@@ -179,14 +179,16 @@ int main(void)
 						 cout << "L" << theta << endl;
 						 cout << "Dist: " << d << endl;
              sprintf(result,"L%f\n", theta);
-             write(newsockfd,result,10);
+           //  write(newsockfd,result,10);
 					 }
 					 else {
 						 cout << "R" << theta << endl;
 						 cout << "Dist: " << d << endl;
              sprintf(result,"R%f\n", (-1.0)*theta);
-             write(newsockfd,result,10);
+           //  write(newsockfd,result,10);
 					 }
+					 sprintf(result,"%f\n",theta);
+           write(newsockfd,result,10);
                      //imshow("Contours", drawing);
  
                      //waitKey(20);

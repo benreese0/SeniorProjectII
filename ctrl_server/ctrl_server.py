@@ -3,6 +3,9 @@
 import socket
 import select
 
+
+angle = 8
+
 #constants
 cmd_port = 7777
 img_port = 7778
@@ -11,7 +14,7 @@ line_port = 7780
 pi_addr = '192.168.1.7'
 sign_addr = '192.168.1.6'
 line_addr = '192.168.1.6'
-ctrl_addr = '192.168.1.3'
+ctrl_addr = '192.168.1.6'
 fourmb = 1024*1024*4
 
 #static sockets
@@ -24,14 +27,15 @@ print("Pi cmd connection made")
 ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ctrl_sock.connect( (ctrl_addr, cmd_port) )
 print("Ctrl connection made")
-sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sign_sock.connect( (img_addr, img_port) )
-print("Sign connection made")
+#sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#sign_sock.connect( (img_addr, img_port) )
+#print("Sign connection made")
 line_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-line_sock.connect( (img_addr, img_port) )
+line_sock.connect( (line_addr, line_port) )
 print("Line connection made")
 
-sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
+#sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
+sources = [pi_img, pi_cmd, ctrl_sock, line_sock]
 
 while True:
  try:
@@ -45,15 +49,19 @@ while True:
     data = pi_img.recv(fourmb)
     #while data.length() >0: 
      #   print("lenn" + str(data.len()))
-    img_sock.sendall(data)
+    line_sock.sendall(data)
       #  data = pi_img.recv(fourmb)
    elif src == pi_cmd:#data from pi
     data = pi_cmd.recv(1024)
     print("Arduino:" + str(data))
-   elif src == img_sock:#cmd from img_proc
-    data = img_sock.recv(1024)
+   elif src == line_sock:#cmd from img_proc
+    data = line_sock.recv(1024)
     print("IMGCMD:"+ str(data))
-    pi_cmd.sendall(data)
+    angle = angle + float(data[0:4])
+    if angle >0:
+     pi_cmd.sendall('L' + str(int(angle)))   
+    else:
+     pi_cmd.sendall('R' + str(int(-1.0*angle)))
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
     pi_cmd.sendall(data)

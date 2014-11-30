@@ -10,8 +10,8 @@ cmd_port = 7777
 img_port = 7778
 lines_port = 7780
 pi_addr = '192.168.1.7'
-img_addr = '192.168.1.6'
-ctrl_addr = '192.168.1.6'
+img_addr = '192.168.1.4'
+ctrl_addr = '192.168.1.4'
 fourmb = 1024*1024*4
 
 
@@ -56,8 +56,8 @@ while True:
         currangle = 25
     elif currangle < -30:
         currangle = -25
-    if abs(newangle) > 4:
-     currangle = newangle/4 + currangle
+    if abs(newangle) > 6:
+     currangle = newangle/6 + currangle
      currangle = int(currangle)
      print("new currangle:" + str(currangle))
      if currangle >0:

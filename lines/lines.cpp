@@ -114,10 +114,10 @@ int main(void)
 				waitKey(5);
 
 		    double xcrop, ycrop;
-			  xcrop = 5.5/8;
-			  ycrop = 3.0/5;
+			  xcrop = 4.0/8.0;
+			  ycrop = 3.5/5.0;
 		      
-        Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
+        Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(0.9-ycrop));
         src = og(ROI);
 				if(src.empty()){
 					cout << "SRC EMPTY!!" << endl;}
@@ -165,7 +165,7 @@ int main(void)
  
                      double theta = atan((lines[1])/(lines[0])) * 57.2957795;
 										cout << "theta og:" << theta << endl;
-									 theta = theta - 41;	
+									 theta = theta - 45;	
 										 // final factor converts from radians to degress and shifts for perspective
 					 
 					 double m, b, xsmall, Xsmall, d;
@@ -180,16 +180,9 @@ int main(void)
           char result[10];
 					for (unsigned i =0; i < 10; ++i) result[i] = 0;
 
-					 if (theta >= 0){
-						 cout << "L" << theta << '\t' << "Dist: " << d << endl;
-					 }
-					 else {
-						 cout << "R" << theta << '\t' << "Dist: " << d << endl;
-             sprintf(result,"R%f\n", (-1.0)*theta);
-					 }
+						 cout << "theta:" << theta << '\t' << "Dist: " << d << endl;
 					 sprintf(result,"%f",theta);
            write(newsockfd,result, 10);
-					 cout << "theta size: " << sizeof(theta) <<" value:" << (int) theta << endl;
                      //imshow("Contours", drawing);
  
                      //waitKey(20);

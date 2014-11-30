@@ -15,7 +15,7 @@ ctrl_addr = '192.168.1.6'
 fourmb = 1024*1024*4
 
 
-currangle = -8 #start left by eight
+currangle = -7 #start left by eight
 
 #static sockets
 pi_img = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,7 +33,7 @@ print("Img connection made")
 
 
 #startup with centered wheels
-#pi_cmd.sendall('L8\n')
+pi_cmd.sendall('L7\n')
 
 sources = [pi_img, pi_cmd, img_sock, ctrl_sock]
 
@@ -50,16 +50,21 @@ while True:
    elif src == img_sock:#cmd from img_proc
     data = img_sock.recv(1024)
     data = str(data).strip('\x00')
-    newangle = int(float(data))/4
+    newangle = int(float(data))
     print("newangle"+ str(newangle))
-    currangle = newangle + currangle
-    print("next currangle:"+ str(currangle))
-    if abs(newangle) > 1:
+    if currangle > 30:
+        currangle = 25
+    elif currangle < -30:
+        currangle = -25
+    if abs(newangle) > 4:
+     currangle = newangle/4 + currangle
+     currangle = int(currangle)
+     print("new currangle:" + str(currangle))
      if currangle >0:
-      cmd = 'L' + str(currangle) + '\n'
+      cmd = 'R' + str(currangle) + '\n'
      else:
-      cmd = 'R' + str(-1*currangle) +'\n'
-     print("command" + repr(cmd))
+      cmd = 'L' + str(-1*currangle) +'\n'
+     print("command" + repr(cmd) + '\t newangle:' + str(newangle))
      pi_cmd.sendall(cmd)
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)

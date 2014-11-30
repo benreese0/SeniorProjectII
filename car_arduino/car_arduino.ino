@@ -38,7 +38,7 @@ int speedSensor = A1;
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   command.reserve(200); 
   turnServo.attach(9);
   camServo.attach(10);

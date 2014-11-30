@@ -160,15 +160,22 @@ int main(void)
                fitLine (contours[0], lines, CV_DIST_HUBER, 0, 0.01, 0.01);
                //cout << "lines: " << lines[0] << " "<< lines[1] << " "<< lines[2] << " " << lines[3] << endl;
                int lefty = (-lines[2]*lines[1]/lines[0])+lines[3];
+<<<<<<< Updated upstream
                      int righty = ((src_gray.cols-lines[2])*lines[1]/lines[0])+lines[3];
                      line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
  
                      double theta = atan((lines[1])/(lines[0])) * 57.2957795;
 										cout << "theta og:" << theta << endl;
 									 theta = theta - 45;	
+=======
+               int righty = ((src_gray.cols-lines[2])*lines[1]/lines[0])+lines[3];
+               line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
+
+               double theta = atan((lines[1])/(lines[0])) * 57.2957795 - 31; 
+>>>>>>> Stashed changes
 										 // final factor converts from radians to degress and shifts for perspective
 					 
-					 double m, b, xsmall, Xsmall, d;
+					double m, b, xsmall, Xsmall, d;
 					 m = lines[1]/lines[2];
 					 b = lines[3] - m*lines[2];
 
@@ -178,11 +185,29 @@ int main(void)
 					 d = Xsmall - og.cols/2;
 
           char result[10];
+<<<<<<< Updated upstream
 					for (unsigned i =0; i < 10; ++i) result[i] = 0;
 
 						 cout << "theta:" << theta << '\t' << "Dist: " << d << endl;
 					 sprintf(result,"%f",theta);
            write(newsockfd,result, 10);
+=======
+					 if (theta >= 0){
+						 cout << "L" << (int)theta << endl;
+						 cout << "Dist: " << d << endl;
+             sprintf(result,"L%d\n", (int)theta);
+             write(newsockfd,result,6);
+             cout << result << endl;
+					 }
+					 else {
+						 cout << "R" << (int)theta << endl;
+						 cout << "Dist: " << d << endl;
+                                                 
+                                                 sprintf(result,"R%d\n", (int)((-1.0)*theta));
+                                                 write(newsockfd,result,6);
+					 }
+                                         cout << result << endl;
+>>>>>>> Stashed changes
                      //imshow("Contours", drawing);
  
                      //waitKey(20);

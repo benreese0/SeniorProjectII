@@ -50,6 +50,7 @@ void handler_catch (int sig) {
         cout << "closing sockfd:" << close(sockfd) << endl;
         sockfd = 0;
     }
+		exit(0);
 }
 
 

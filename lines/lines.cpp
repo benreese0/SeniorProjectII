@@ -136,7 +136,7 @@ int main(void)
 				waitKey(5);
 
 		    double xcrop, ycrop;
-			  xcrop = 4.0/8.0;
+			  xcrop = 3.5/8.0;
 			  ycrop = 3.5/5.0;
 		      
         Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(0.9-ycrop));

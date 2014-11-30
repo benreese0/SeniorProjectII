@@ -127,7 +127,7 @@ void loop() {
 //  if (rightValue>thresholdVal || leftValue>thresholdVal)
   if (leftValue>thresholdVal)
   {
-    Serial.println("O");
+    Serial.println("O\n");
     stopCar();
     delay(500);
     while(leftValue>80){
@@ -135,7 +135,7 @@ void loop() {
     }
     command = "";
     while(Serial.read() != -1);
-    Serial.print("G");
+    Serial.print("G\n");
   }
   else if (commandComplete){
     comm = command[0];
@@ -156,6 +156,7 @@ void loop() {
       //parameter in the right direction
       turnServo.write(90-inX);
       camServo.write(90-inX);
+      Serial.print("AR\n");
       break;
 
     case 'L':
@@ -163,6 +164,7 @@ void loop() {
       //parameter in the left direction
       turnServo.write(90+inX);
       camServo.write(90+inX);
+      Serial.print("AL\n");
       break;
 
     case 'A':
@@ -179,20 +181,7 @@ void loop() {
 
     command = "";
     commandComplete = false;
-/*    if (ACSR & (1<<ACO))    // check status of comparator output flag; if set, then check the speed
-    {
-      if (led==HIGH)
-      {
-        currentSpeed = calcSpeed(lastHigh,lastLow);
-      }
-      else
-      {
-        currentSpeed = calcSpeed(lastLow,lastHigh);
-      }
-    }
   }
-*/
-}
 }
 
 // Command to determine speed based on 1 revolution between beginTime and endTime
@@ -215,18 +204,3 @@ void serialEvent() {
     }
   }
 }
-
-// Interrupt - Store the last time there was a high or low. 
-// Helps to determine the speed of the car
-/*ISR(ANALOG_COMP_vect) {
-  if (digitalRead(led)==HIGH){
-    digitalWrite(led,LOW);
-    lastHigh = millis();
-  }
-  else
-  {
-    digitalWrite(led,HIGH);
-    lastLow = millis();
-  }
-}*/
-

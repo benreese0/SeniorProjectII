@@ -6,24 +6,7 @@
 #include <Servo.h>
 #define thresholdVal 100
 
-
-// constants
-const unsigned breakThresh = 1510;
-const unsigned breakVal = 1000;
-const unsigned neutralVal = 1480;
-const unsigned bumpThresh = 1580;
-const unsigned bumpVal = 1650;
-const int IRThresh = 80;
-
-// Pin Assignments
-const int led = 13;
-const int leftIRSensor = 3;
-const int compStandard = A0;
-const int speedSensor = A1;
-const int turnServoPin = 9;
-const int camServoPin = 10;
-const int speedServoPin = 9;
-
+// Pins and Variables
 
 // Variables
 Servo turnServo;
@@ -44,50 +27,64 @@ unsigned long lastHigh = 0;
 unsigned long lastLow = 0;
 float currentSpeed = 0;
 
+// Pin Assignments
+int led = 13;
+int rightIRSensor = 2;
+int leftIRSensor = 3;
+int compStandard = A0;
+int speedSensor = A1;
+
+
 
 
 void setup() {
   Serial.begin(9600);
   command.reserve(200); 
-  turnServo.attach(turnServoPin);
-  camServo.attach(camServoPin);
-  speedServo.attach(speedServoPin,1000,2000);
+  turnServo.attach(9);
+  camServo.attach(10);
+  speedServo.attach(11,1000,2000);
   
   pinMode(led,OUTPUT);
+  analogRead(rightIRSensor);
   analogRead(leftIRSensor);
   analogRead(compStandard);
   analogRead(speedVal);
-  speedServo.writeMicroseconds(neutralVal);
-  currentMicro = neutralVal;
+  speedServo.writeMicroseconds(1480);
+  currentMicro = 1480;
 
   
 }
 
 void stopCar() {
    Serial.print(currentMicro);
-  if (currentMicro>=breakThresh)
+  if (currentMicro>=1510)
       {
-        speedServo.writeMicroseconds(breakVal);
-        currentMicro = breakVal;
+        speedServo.writeMicroseconds(1000);
+        currentMicro = 1000;
       }
       else
       {
-        speedServo.writeMicroseconds(neutralVal);
-        currentMicro = neutralVal;
+        speedServo.writeMicroseconds(1480);
+        currentMicro = 1480;
       }  
 }
 
 void FcarSpeed(int newSpeed){
-  if (newSpeed<neutralVal){
+  if (newSpeed<1480){
     Serial.print("E\n");
   }
-  else if (currentMicro <bumpThresh && newSpeed<=bumpThresh){
-    speedServo.writeMicroseconds(bumpVal);
+  else if (currentMicro <1580 && newSpeed<=1580){
+    speedServo.writeMicroseconds(1580);
     delay(50);
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else {
+  else if (currentMicro>=1580 && newSpeed>1580){
+    speedServo.writeMicroseconds(newSpeed);
+    currentMicro = newSpeed;
+  }
+  else
+  {
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
@@ -95,18 +92,18 @@ void FcarSpeed(int newSpeed){
 }
 
 void RcarSpeed(int newSpeed){
-  if (newSpeed>neutralVal){
+  if (newSpeed>1480){
     Serial.print("E\n");
   }
-  else if (currentMicro > neutralVal){
-    speedServo.writeMicroseconds(breakVal);
+  else if (currentMicro > 1480){
+    speedServo.writeMicroseconds(1200);
     delay(1000);
-    speedServo.writeMicroseconds(neutralVal);
+    speedServo.writeMicroseconds(1480);
     delay(100);
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
-  else if (currentMicro <= neutralVal){
+  else if (currentMicro <= 1480){
     speedServo.writeMicroseconds(newSpeed);
     currentMicro = newSpeed;
   }
@@ -125,15 +122,18 @@ void loop() {
 
   // Assumptions - name of the char will be comm
   // name of the parameter will be inX
+//  rightValue = analogRead(rightIRSensor);
   leftValue = analogRead(leftIRSensor);
+//  if (rightValue>thresholdVal || leftValue>thresholdVal)
   if (leftValue>thresholdVal)
   {
     Serial.println("O");
     stopCar();
     delay(500);
-    while(leftValue>IRThresh){
+    while(leftValue>80){
       leftValue = analogRead(leftIRSensor);
     }
+    command = "";
     while(Serial.read() != -1);
     Serial.print("G");
   }
@@ -164,17 +164,44 @@ void loop() {
       turnServo.write(90+inX);
       camServo.write(90+inX);
       break;
+
     case 'A':
       break;
       // Acknowledge
     case 'E':
       // Error - therefore stop immediately!!
       stopCar();
+
       break;
+
     }
+
+
     command = "";
     commandComplete = false;
+/*    if (ACSR & (1<<ACO))    // check status of comparator output flag; if set, then check the speed
+    {
+      if (led==HIGH)
+      {
+        currentSpeed = calcSpeed(lastHigh,lastLow);
+      }
+      else
+      {
+        currentSpeed = calcSpeed(lastLow,lastHigh);
+      }
+    }
   }
+*/
+}
+}
+
+// Command to determine speed based on 1 revolution between beginTime and endTime
+float calcSpeed(long beginTime, long endTime)
+{
+  long passedTime = endTime-beginTime;
+  passedTime = passedTime/1000;
+  return 1/(passedTime);
+  
 }
 
 
@@ -183,8 +210,23 @@ void serialEvent() {
   while (Serial.available()) {
     char inChar = char(Serial.read());
     command += inChar;
-    if (inChar== '\n') commandComplete=true;
+    if (inChar== '\n'){
+      commandComplete=true;
+    }
   }
 }
 
+// Interrupt - Store the last time there was a high or low. 
+// Helps to determine the speed of the car
+/*ISR(ANALOG_COMP_vect) {
+  if (digitalRead(led)==HIGH){
+    digitalWrite(led,LOW);
+    lastHigh = millis();
+  }
+  else
+  {
+    digitalWrite(led,HIGH);
+    lastLow = millis();
+  }
+}*/
 

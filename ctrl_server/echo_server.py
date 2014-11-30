@@ -15,7 +15,7 @@ ctrl_addr = '192.168.1.6'
 fourmb = 1024*1024*4
 
 
-currangle = 8
+currangle = -8 #start left by eight
 
 #static sockets
 pi_img = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -54,11 +54,11 @@ while True:
     print("newangle"+ str(newangle))
     currangle = newangle + currangle
     print("next currangle:"+ str(currangle))
-    if newangle > 1 or newangle < -1:
+    if abs(newangle) > 1:
      if currangle >0:
-      cmd = 'R' + str(currangle) + '\n'
+      cmd = 'L' + str(currangle) + '\n'
      else:
-      cmd = 'L' + str(-1*currangle) +'\n'
+      cmd = 'R' + str(-1*currangle) +'\n'
      print("command" + repr(cmd))
      pi_cmd.sendall(cmd)
    elif src == ctrl_sock:#cmd from ctrl

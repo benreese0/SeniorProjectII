@@ -6,9 +6,10 @@
 #include <Servo.h>
 #define thresholdVal 100
 
-// Pins and Variables
+// Constants
+const int battTimeThresh = 1000;
 
-// Variables
+// Global Variables
 Servo turnServo;
 Servo speedServo;
 Servo camServo;
@@ -23,16 +24,19 @@ int rightValue = 0;
 int leftValue = 0;
 int compVal = 0;
 int speedVal = 0;
+float batt_voltage = 0;
+unsigned long battTime;
 unsigned long lastHigh = 0;
 unsigned long lastLow = 0;
 float currentSpeed = 0;
 
 // Pin Assignments
-int led = 13;
-int rightIRSensor = 2;
-int leftIRSensor = 3;
-int compStandard = A0;
-int speedSensor = A1;
+const int led = 13;
+const int rightIRSensor = 2;
+const int leftIRSensor = 3;
+const int compStandard = A0;
+const int speedSensor = A1;
+const int battVoltage = A2;
 
 
 
@@ -51,6 +55,7 @@ void setup() {
   analogRead(speedVal);
   speedServo.writeMicroseconds(1480);
   currentMicro = 1480;
+  battTime = millis();
 
   
 }
@@ -177,7 +182,16 @@ void loop() {
       break;
 
     }
+    if (millis() - battTimeThresh > battTime){
+      batt_voltage = analogRead(battVoltage) *5.0*2.0/1023.0;
+      Serial.write("P");
+      Serial.print(batt_voltage);
+      Serial.write('\n');
+      battTime = millis();
+    }
 
+float batt_voltage = 0;
+unsigned long battTime;
 
     command = "";
     commandComplete = false;

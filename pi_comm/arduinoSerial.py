@@ -4,7 +4,7 @@ import socket
 import select
 
 #constants
-baudrate = 9600
+baudrate = 115200
 port = 7777
 comport = '/dev/ttyAMA0'
 

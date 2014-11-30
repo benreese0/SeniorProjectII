@@ -41,9 +41,15 @@ int newsockfd = 0;
 int sockfd = 0;
 
 void handler_catch (int sig) {
-    cout << "Received signal:" <<sig << endl;
-    if  (sockfd != 0) cout << "closing sockfd:" << close(sockfd) << endl;
-    if  (newsockfd != 0) cout << "closing newsockfd:" << close(newsockfd) << endl;
+    cout << "Received signal:" <<sig << '\t';
+    if  (newsockfd != 0) {
+        cout << "closing newsockfd:" << close(newsockfd) <<'\t';
+        newsockfd = 0;
+    }
+    if  (sockfd != 0) {
+        cout << "closing sockfd:" << close(sockfd) << endl;
+        sockfd = 0;
+    }
 }
 
 

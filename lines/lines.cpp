@@ -17,7 +17,6 @@
 #include <string>
 #include <vector>
 #include <math.h>
-
 #include <fstream>
 
 // socket libraries
@@ -26,6 +25,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+//interrupt libraries
+#include <signal.h>
+#include <unistd.h>
+
+
 using namespace cv;
 using namespace std;
  
@@ -33,16 +37,34 @@ Mat og, src, src_gray, img;
 int thresh = 150;
 int max_thresh = 255;
 
+int newsockfd = 0;
+int sockfd = 0;
+
+void handler_catch (int sig) {
+    cout << "Received signal:" <<sig << endl;
+    if  (sockfd != 0) cout << "closing sockfd:" << close(sockfd) << endl;
+    if  (newsockfd != 0) cout << "closing newsockfd:" << close(newsockfd) << endl;
+}
+
+
+
  
 /** @function main */
 int main(void)
 {
-    int sockfd, newsockfd, portno;
-		int nread =0;
-		int n;
-    char * imgBuff;
-		time_t t_val;
-    vector <char> imgVec;
+	struct sigaction sigIntHandler;
+	int portno;
+	int nread =0;
+	int n;
+	char * imgBuff;
+	time_t t_val;
+	vector <char> imgVec;
+        
+        //Interrupts
+        sigIntHandler.sa_handler = handler_catch;
+        sigemptyset(&sigIntHandler.sa_mask);
+        sigIntHandler.sa_flags = 0;
+        sigaction(SIGINT, &sigIntHandler, NULL);
 	
     struct sockaddr_in serv_addr;
     // sockaddr_in = struct containing int addr  

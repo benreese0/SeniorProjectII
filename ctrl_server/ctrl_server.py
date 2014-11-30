@@ -4,7 +4,6 @@ import socket
 import select
 
 
-angle = 8
 
 #constants
 cmd_port = 7777
@@ -16,23 +15,38 @@ sign_addr = '192.168.1.6'
 line_addr = '192.168.1.6'
 ctrl_addr = '192.168.1.6'
 fourmb = 1024*1024*4
+v1 = 1560
+v2 = 1600
+angle_tolerance = 10
+
+
+#global variables
+
+currentVeloctiy = 1480 # 1480 = stopped
+currentStatus = str()
+angle = 8
+
+
+
+
+
 
 #static sockets
 pi_img = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pi_img.connect( (pi_addr, img_port) )
-print("Pi img connection made")
+print("Pi image connection made:" + str(pi_img.getpeername()))
 pi_cmd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pi_cmd.connect( (pi_addr, cmd_port) )
-print("Pi cmd connection made")
-ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ctrl_sock.connect( (ctrl_addr, cmd_port) )
-print("Ctrl connection made")
+print("Pi command connection made:" + str(pi_cmd.getpeername()))
 #sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #sign_sock.connect( (img_addr, img_port) )
-#print("Sign connection made")
+#print("Sign connection made:" + str(sign_sock.getppername()))
 line_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 line_sock.connect( (line_addr, line_port) )
-print("Line connection made")
+print("Line connection made:" + str(line_sock.getpeername()))
+ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ctrl_sock.connect( (ctrl_addr, cmd_port) )
+print("Local control connection made:" + str(ctrl_sock.getpeername()))
 
 #sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
 sources = [pi_img, pi_cmd, ctrl_sock, line_sock]
@@ -41,6 +55,7 @@ while True:
  try:
   inrdy, outrdy, errdy = select.select(sources,[],sources)
   for src in errdy:
+   print ("Error with socket:" + src.getsockname())
    for sock in sources:
     sock.close()
 

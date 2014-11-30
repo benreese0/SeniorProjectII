@@ -110,10 +110,11 @@ int main(void)
 				if(og.empty()){
 					cout << "OG EMPTY!!" << endl;}
 
- 				//imshow("og", og);
+ 				imshow("og", og);
+				waitKey(5);
 
 		    double xcrop, ycrop;
-			  xcrop = 6.5/8;
+			  xcrop = 5.5/8;
 			  ycrop = 3.0/5;
 		      
         Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
@@ -123,7 +124,7 @@ int main(void)
         //cvtColor(src, src_gray, CV_RGB2GRAY);
 				src.copyTo(src_gray);
  
-          //imshow ("src", src);
+        imshow ("src", src);
  
         GaussianBlur(src_gray, src_gray, Size(9,9),0,0);
  
@@ -162,7 +163,9 @@ int main(void)
                      int righty = ((src_gray.cols-lines[2])*lines[1]/lines[0])+lines[3];
                      line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
  
-                     double theta = atan((lines[1])/(lines[0])) * 57.2957795 - 31; 
+                     double theta = atan((lines[1])/(lines[0])) * 57.2957795;
+										cout << "theta og:" << theta << endl;
+									 theta = theta - 41;	
 										 // final factor converts from radians to degress and shifts for perspective
 					 
 					 double m, b, xsmall, Xsmall, d;
@@ -175,20 +178,18 @@ int main(void)
 					 d = Xsmall - og.cols/2;
 
           char result[10];
+					for (unsigned i =0; i < 10; ++i) result[i] = 0;
+
 					 if (theta >= 0){
-						 cout << "L" << theta << endl;
-						 cout << "Dist: " << d << endl;
-             sprintf(result,"L%f\n", theta);
-           //  write(newsockfd,result,10);
+						 cout << "L" << theta << '\t' << "Dist: " << d << endl;
 					 }
 					 else {
-						 cout << "R" << theta << endl;
-						 cout << "Dist: " << d << endl;
+						 cout << "R" << theta << '\t' << "Dist: " << d << endl;
              sprintf(result,"R%f\n", (-1.0)*theta);
-           //  write(newsockfd,result,10);
 					 }
-					 sprintf(result,"%f\n",theta);
-           write(newsockfd,result,10);
+					 sprintf(result,"%f",theta);
+           write(newsockfd,result, 10);
+					 cout << "theta size: " << sizeof(theta) <<" value:" << (int) theta << endl;
                      //imshow("Contours", drawing);
  
                      //waitKey(20);

@@ -133,6 +133,7 @@ void loop() {
     while(leftValue>80){
       leftValue = analogRead(leftIRSensor);
     }
+    command = "";
     while(Serial.read() != -1);
     Serial.print("G");
   }

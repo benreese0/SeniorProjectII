@@ -149,9 +149,11 @@ void loop() {
     switch (comm) {
     case 'S':  // Stop Car         
       stopCar();
+      Serial.print("AS\n");
       break;
     case 'F':  // Car Forward Command
       FcarSpeed(inX);
+      Serial.print("AF\n");
       break;
     case 'B':  // Car Backward Command
       RcarSpeed(inX);
@@ -182,20 +184,16 @@ void loop() {
       break;
 
     }
-    if (millis() - battTimeThresh > battTime){
+    command = "";
+    commandComplete = false;
+  }
+    if (millis() > battTime){
       batt_voltage = analogRead(battVoltage) *5.0*2.0/1023.0;
       Serial.write("P");
       Serial.print(batt_voltage);
       Serial.write('\n');
-      battTime = millis();
+      battTime = millis() + battTimeThresh;
     }
-
-float batt_voltage = 0;
-unsigned long battTime;
-
-    command = "";
-    commandComplete = false;
-  }
 }
 
 // Command to determine speed based on 1 revolution between beginTime and endTime

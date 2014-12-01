@@ -40,6 +40,8 @@ int max_thresh = 255;
 int newsockfd = 0;
 int sockfd = 0;
 
+int firstimage = 1;
+
 void handler_catch (int sig) {
     cout << "Received signal:" <<sig << '\t';
     if  (newsockfd != 0) {
@@ -125,6 +127,10 @@ int main(void)
 				while(nread < n){
        	 nread += read(newsockfd, (imgBuff+nread), n-nread);
 			 }
+				if (firstimage){
+				 cout << "First image received" << endl;
+				 firstimage = !firstimage;
+				}
 				//cout << "Network time:" << ((float)(clock() - now))/CLOCKS_PER_SEC<<endl;
 				//now = clock();
 

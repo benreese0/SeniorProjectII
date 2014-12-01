@@ -32,20 +32,18 @@ int lowThreshold = 50; // 75
 bool match = false;
 double H;
 Mat og, src, src_gray, img;
+int firstimage = 1;
 
 string intToString(int number) {
-
     std::stringstream ss;
     ss << number;
     return ss.str();
 }
 
 class Symbol {
-
     public:
         Mat img;
         string name;
-
 };
 
 
@@ -150,7 +148,7 @@ string stop(std::vector<vector<Point> >&contours) {
         if (approxOct.size() == 8) {
             float area = contourArea(contours[i]);
 
-            if (area > 200) {
+            if (area > 2000) {
                 std::vector<cv::Point2f> corners;
 
                 vector<Point>::iterator vertex;
@@ -380,7 +378,7 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
 
                         //imshow("correctedimgbin", correctedImgBin);
 
-                        threshold(correctedImgBin, correctedImgBin, 140, 255, 0);
+                        threshold(correctedImgBin, correctedImgBin, 120, 255, 0);
 
                         int r,c;
                         r = correctedImgBin.rows;
@@ -404,22 +402,24 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                             bitwise_xor(new_image, symbols[i].img, diffImg, noArray());
                             diff = countNonZero(diffImg);
 
-                  //          if (i ==1){
-                  //              cout << "diff: " << diff << endl;
-                  //          }
+                            //if (i ==1){
+                            //    cout << "diff: " << diff << endl;
+                            //}
                             if (diff < minDiff  && i == 0) {
                             //minDiff = diff;
-                            match = true;
-                            str = "V1";
+                            	match = true;
+                           	  str = "V1";
+                          	  cout << "diff: " << diff << endl;
                             }
                             if (diff < minDiff  && i == 1) {
                                 //cout << "Hi" << endl;
                                 match = true;
                                 str = "V2";
+                                cout << "diff: " << diff << endl;
                             }
                             imshow("diff", diffImg);
                             //imshow("act", new_image);
-                            //waitKey(0);
+                            //waitKey(1);
                         }
                     }
                 }
@@ -531,11 +531,15 @@ int main(void) {
         while (nread<n){
             nread += read(newsockfd, (imgBuff+nread),n-nread);
         }
+				if (firstimage) {
+					cout <<"First image received" << endl;
+					firstimage = !firstimage;
+				}
         imgVec.assign(imgBuff,imgBuff+n);
         imdecode(imgVec,CV_LOAD_IMAGE_GRAYSCALE, &og);
         if(og.empty()){
             cout << "OG EMPTY!!" << endl;}
-        imshow("og", og);
+        //imshow("og", og);
         waitKey(2);
         delete [] imgBuff;
 

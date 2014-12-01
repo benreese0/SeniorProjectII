@@ -3,6 +3,7 @@
 import socket
 import select
 import struct
+import time
 
 
 #constants
@@ -51,33 +52,57 @@ while True:
     img2_sock.sendall(data)
    elif src == pi_cmd:#data from pi
     data = pi_cmd.recv(1024)
+    data = data.strip('\x00')
+    #if data[0] == 'P':
+    # voltage = float(data[1:].strip())
+    # if voltage < 5.80:
+    #  print("Voltage low:" + str(voltage))
+    #else:
     print("Arduino:" + str(data))
    elif src == img_sock:#cmd from img_proc
     data = img_sock.recv(1024)
     data = str(data).strip('\x00')
-    print (data)
-    cmd = data + '\n'
-    pi_cmd.sendall(cmd)
+    data = data.strip()
+    data = data.split('\n')
+    data = data[0]
+    data = bytes(data)
+    #print (repr(data))
+    if data[0] == 'S':
+     print('stop')
+     #time.sleep(
+     pi_cmd.sendall(bytes('S\n'))
+    elif data[0] == 'Y':
+     print('yield')
+     pi_cmd.sendall(bytes('F1550\n'))
+    elif data[0:2] == 'V1':
+     print('V1')
+     pi_cmd.sendall(bytes('F1560\n'))
+    elif data[0:2] == 'V2':
+     print('V2')
+     pi_cmd.sendall(bytes('F1575\n'))
+    elif data[0] == 'C':
+     pass
+    else:
+     print('strange data:'+repr(data))
    elif src == img2_sock:   
-    print "lines stuck out stuff **********************"
     data = img2_sock.recv(1024)
-    data = str(data).strip('\x00')
-    newangle = int(float(data))
-    print("newangle"+ str(newangle))
-    if currangle > 30:
-        currangle = 25
-    elif currangle < -30:
-        currangle = -25
-    if abs(newangle) > 6:
-     currangle = newangle/6 + currangle
-     currangle = int(currangle)
-     print("new currangle:" + str(currangle))
-     if currangle >0:
-      cmd = 'R' + str(currangle) + '\n'
-     else:
-      cmd = 'L' + str(-1*currangle) +'\n'
-     print("command" + repr(cmd) + '\t newangle:' + str(newangle))
-     pi_cmd.sendall(cmd)
+    #data = str(data).strip('\x00')
+    #newangle = int(float(data))
+    #print("newangle"+ str(newangle))
+    #if currangle > 30:
+    #    currangle = 25
+    #elif currangle < -30:
+    #    currangle = -25
+    #if abs(newangle) > 6:
+    # currangle = newangle/6 + currangle
+    # currangle = int(currangle)
+     #print("new currangle:" + str(currangle))
+     #if currangle >0:
+     # cmd = 'R' + str(currangle) + '\n'
+     #else:
+     # cmd = 'L' + str(-1*currangle) +'\n'
+     #print("command" + repr(cmd) + '\t newangle:' + str(newangle))
+     #pi_cmd.sendall(cmd)
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
     pi_cmd.sendall(data)

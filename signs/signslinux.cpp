@@ -404,9 +404,9 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                             bitwise_xor(new_image, symbols[i].img, diffImg, noArray());
                             diff = countNonZero(diffImg);
 
-                            if (i ==1){
-                                cout << "diff: " << diff << endl;
-                            }
+                  //          if (i ==1){
+                  //              cout << "diff: " << diff << endl;
+                  //          }
                             if (diff < minDiff  && i == 0) {
                             //minDiff = diff;
                             match = true;
@@ -599,18 +599,21 @@ int main(void) {
             char finalResult[10];
 //            cout << result << d << endl;
             sprintf(finalResult,"%s%f\n",result.c_str(),d);
-            //write(newsockfd,finalResult,6);
+            write(newsockfd,finalResult,6);
 						cout << "results:" << finalResult << endl;
             printf("%f time\n",seconds/CLOCKS_PER_SEC);
             match = false;
-            //}
 
             //imshow("A", camera);
 
             //system("pause");
-						}
-
-	}
+	    }
+        else{
+            char finalResult[10];
+            sprintf(finalResult,"C\n");
+            write(newsockfd,finalResult,6);
+        }
+}
  close(newsockfd);
  close(sockfd);
  //waitKey(0);

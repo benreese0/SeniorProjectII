@@ -114,7 +114,7 @@ while True:
       print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  
     elif data[0] == 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
-     pi_cmd.write('F' + str(currentVelocity) + '\n')
+     pi_cmd.sendall('F' + str(currentVelocity) + '\n')
     elif data[0] == 'E': #Error
      print("Arduino error found:" + str(data))
     elif data[0] == 'O': #Obstacle
@@ -154,7 +154,7 @@ while True:
       pass
      elif data[0] == 'S': #Saw stop sign
       currentStatus = 'Stopped'
-      pi_cmd.write('S\n')
+      pi_cmd.sendall('S\n')
      elif data[0] == 'Y':#Saw Yield sign
       currentStatus = 'yield'
       currentVelocity = vyield
@@ -190,7 +190,7 @@ while True:
       pi_cmd.sendall('F'+str(currentVelocity) + '\n')
      elif data[0] == 'S': #Saw stop sign
       currentStatus = 'Stopped'
-      pi_cmd.write('S\n')
+      pi_cmd.sendall('S\n')
      elif data[0] == 'Y':#Saw Yield sign
       pass
      elif data[0] == 'V':#Saw Speed sign
@@ -207,8 +207,6 @@ while True:
     print("got unexpected data:")
     print(src.recv(1024))
  except KeyboardInterrupt:
-  break
- except ConnectionRefusedError:
   break
 print('Exiting')
 

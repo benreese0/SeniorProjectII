@@ -20,9 +20,12 @@ while True:
  try:
   inrdy, outrdy, errdy = select.select(sources_static+sources_net,[],[])
   for src in errdy:#handle errors first
-   src.close()
-   print("removing cliet" + str(src.getpeername()))
-   sources_net.remove(src)
+   for i in sources_static:
+    i.close()
+   for i in sources_net:
+    i.close()
+   break
+
   for src in inrdy:
    if src == ctrl_srv: #new connection made
     new_client, addr = ctrl_srv.accept()

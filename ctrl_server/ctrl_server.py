@@ -11,9 +11,9 @@ img_port = 7778
 sign_port = 7779
 line_port = 7780
 pi_addr = '192.168.1.7'
-sign_addr = '192.168.1.4'
-line_addr = '192.168.1.4'
-ctrl_addr = '192.168.1.4'
+sign_addr = '192.168.1.6'
+line_addr = '192.168.1.6'
+ctrl_addr = '192.168.1.6'
 fourmb = 1024*1024*4
 v1 = 1566
 v2 = 1580
@@ -28,7 +28,7 @@ maxturn = 30
 
 #global variables
 
-currentVeloctiy = vstopped
+currentVelocity = vstopped
 currentStatus = str()
 #values: 'Driving' 'Stopped' 'Obstacle' 'yield'
 angle = -8
@@ -48,8 +48,8 @@ pi_cmd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pi_cmd.connect( (pi_addr, cmd_port) )
 print("Pi command connection made:" + str(pi_cmd.getpeername()))
 sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sign_sock.connect( (sign_addr, img_port) )
-print("Sign connection made:" + str(sign_sock.getppername()))
+sign_sock.connect( (sign_addr, sign_port) )
+print("Sign connection made:" + str(sign_sock.getpeername()))
 line_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 line_sock.connect( (line_addr, line_port) )
 print("Line connection made:" + str(line_sock.getpeername()))

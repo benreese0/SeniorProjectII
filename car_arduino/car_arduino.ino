@@ -4,11 +4,11 @@
 
 // Included Libraries
 #include <Servo.h>
-#define thresholdVal 100
+
 
 // Constants
 const int battTimeThresh = 1000;
-
+const int thresholdVal = 150;
 // Global Variables
 Servo turnServo;
 Servo speedServo;
@@ -61,7 +61,6 @@ void setup() {
 }
 
 void stopCar() {
-   Serial.print(currentMicro);
   if (currentMicro>=1510)
       {
         speedServo.writeMicroseconds(1000);
@@ -132,14 +131,14 @@ void loop() {
 //  if (rightValue>thresholdVal || leftValue>thresholdVal)
   if (leftValue>thresholdVal)
   {
-    Serial.println("O\n");
     stopCar();
+    Serial.println("O\n");
     delay(500);
-    while(leftValue>80){
+    while(leftValue>thresholdVal){
       leftValue = analogRead(leftIRSensor);
     }
-    command = "";
     while(Serial.read() != -1);
+    command = "";
     Serial.print("G\n");
   }
   else if (commandComplete){

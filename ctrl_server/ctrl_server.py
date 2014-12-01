@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import socket
 import select
+import struct
 
 
 
@@ -11,9 +12,9 @@ img_port = 7778
 sign_port = 7779
 line_port = 7780
 pi_addr = '192.168.1.7'
-sign_addr = '192.168.1.6'
-line_addr = '192.168.1.6'
-ctrl_addr = '192.168.1.6'
+sign_addr = '192.168.1.4'
+line_addr = '192.168.1.4'
+ctrl_addr = '192.168.1.4'
 fourmb = 1024*1024*4
 v1 = 1566
 v2 = 1580
@@ -61,11 +62,17 @@ print("Local control connection made:" + str(ctrl_sock.getpeername()))
 pi_cmd.sendall('\nL7\n')
 batt_logfile =  open(batt_logfile_name, 'a')
 batt_logfile.write('#New session started\n')
-firstPic = pi_img.recv(fourmb)
-line_sock.sendall(firstPic);
-sign_sock.sendall(firstPic);
+#firstPicLen = struct.unpack('<L', pi_img.recv(struct.calcsize('<L')))
+#firstPicLen = firstPicLen[0]
+#firstPic = pi_img.recv(firstPicLen)
+#while len(firstPic) < firstPicLen:
+# firstPic += pi_img.recv(firstPicLen - len(firstPic))
+#line_sock.sendall(firstPic);
+#sign_sock.sendall(firstPic);
+#print('First picture sent');
 sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
-destinations = [sign_sock, line_sock]
+#destinations = [sign_sock, line_sock]
+destinations = []
 #sources = [pi_img, pi_cmd, ctrl_sock, line_sock]
 
 while True:
@@ -90,6 +97,8 @@ while True:
 
    if src == pi_img: #new image from pi
     last_img = pi_img.recv(fourmb)
+    sign_sock.sendall(last_img)
+    line_sock.sendall(last_img)
 
    elif src == pi_cmd:#data from arduino
     data = pi_cmd.recv(1024)
@@ -103,22 +112,21 @@ while True:
       currentStatus = 'Stopped'
       print('Status change:' + currentStatus)
      elif data[1] == 'F':#ack forward
-      if currentVelocity != vyield:
+      if currentVelocity != vyield and currentStatus != 'Yield':
        currentStatus = 'Yield'
        print('Status change:' + currentStatus)
       else:
        currentStatus = 'Driving'
-      print('Status change:' + currentStatus)
+       print('Status change:' + currentStatus + ' ' + currentVelocity)
      else:
-      print("Arduino unknown Ack:" + str(data))
+      print("Arduino unknown Ack:" + repr(data))
     elif data[0] == 'P': #battery power
      data= str(data).strip('\x00')
      data = data.split('\x00')
      for i in data:
-        batt_logfile.write(str(data[1:]))
-     data= float(str(data[-1:])[1:])
-     if data < batt_thresh:
-      print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  
+      batt_logfile.write(str(data)[1:])
+      if i < batt_thresh:
+       print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  
     elif data[0] == 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
      print('Status change:' + currentStatus)
@@ -176,9 +184,9 @@ while True:
        currentVelocity = v2
        pi_cmd.sendall('F' + str(v2) + '\n')
       else:#saw speed wtf?
-       print("Signs gave unknown speed command:" + str(data))
+       print("Signs gave unknown speed command:" + repr(data))
      else :
-      print('Signs unexpected command:'+ str(data))
+      print('Signs unexpected command:'+ repr(data))
     elif currentStatus == 'Stopped':
      if data[0] == 'C': #Saw no signs, resume operation
       pi_cmd.sendall('F' + str(currentVelocity) +'\n')
@@ -189,7 +197,7 @@ while True:
      elif data[0] == 'V':#Saw Speed sign
       print('Saw speed while stopped!!')
      else :
-      print('Signs unexpected command:'+ str(data))
+      print('Signs unexpected command:'+ repr(data))
     elif currentStatus == 'Obstacle':
      pass
     elif currentStatus == 'yield':
@@ -203,16 +211,15 @@ while True:
      elif data[0] == 'V':#Saw Speed sign
       print('Saw speed while yield!!')
      else :
-      print('Signs unexpected command:'+ str(data))
+      print('Signs unexpected command:'+ repr(data))
     else:
-     print("In Signs decode, unknown status:" +currentStatus)
+     print("In Signs decode, unknown status:" +repr(currentStatus))
 
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
     pi_cmd.sendall(data)
    else:
-    print("got unexpected data:")
-    print(src.recv(1024))
+    print("got unexpected data:" + repr(src.recv(1024)))
  except KeyboardInterrupt:
   break
 print('Exiting')

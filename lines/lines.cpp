@@ -17,7 +17,6 @@
 #include <string>
 #include <vector>
 #include <math.h>
-
 #include <fstream>
 
 // socket libraries
@@ -26,6 +25,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+//interrupt libraries
+#include <signal.h>
+#include <unistd.h>
+
+
 using namespace cv;
 using namespace std;
  
@@ -33,16 +37,41 @@ Mat og, src, src_gray, img;
 int thresh = 150;
 int max_thresh = 255;
 
+int newsockfd = 0;
+int sockfd = 0;
+
+void handler_catch (int sig) {
+    cout << "Received signal:" <<sig << '\t';
+    if  (newsockfd != 0) {
+        cout << "closing newsockfd:" << close(newsockfd) <<'\t';
+        newsockfd = 0;
+    }
+    if  (sockfd != 0) {
+        cout << "closing sockfd:" << close(sockfd) << endl;
+        sockfd = 0;
+    }
+		exit(0);
+}
+
+
+
  
 /** @function main */
 int main(void)
 {
-    int sockfd, newsockfd, portno;
-		int nread =0;
-		int n;
-    char * imgBuff;
-		time_t t_val;
-    vector <char> imgVec;
+	struct sigaction sigIntHandler;
+	int portno;
+	int nread =0;
+	int n;
+	char * imgBuff;
+	time_t t_val;
+	vector <char> imgVec;
+        
+        //Interrupts
+        sigIntHandler.sa_handler = handler_catch;
+        sigemptyset(&sigIntHandler.sa_mask);
+        sigIntHandler.sa_flags = 0;
+        sigaction(SIGINT, &sigIntHandler, NULL);
 	
     struct sockaddr_in serv_addr;
     // sockaddr_in = struct containing int addr  
@@ -114,10 +143,10 @@ int main(void)
 				waitKey(5);
 
 		    double xcrop, ycrop;
-			  xcrop = 5.5/8;
-			  ycrop = 3.0/5;
+			  xcrop = 3.5/8.0;
+			  ycrop = 3.5/5.0;
 		      
-        Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(1-ycrop));
+        Rect ROI(og.cols*xcrop, og.rows*ycrop, og.cols*(1-xcrop), og.rows*(0.9-ycrop));
         src = og(ROI);
 				if(src.empty()){
 					cout << "SRC EMPTY!!" << endl;}
@@ -165,7 +194,7 @@ int main(void)
  
                      double theta = atan((lines[1])/(lines[0])) * 57.2957795;
 										cout << "theta og:" << theta << endl;
-									 theta = theta - 41;	
+									 theta = theta - 45;	
 										 // final factor converts from radians to degress and shifts for perspective
 					 
 					 double m, b, xsmall, Xsmall, d;
@@ -180,16 +209,9 @@ int main(void)
           char result[10];
 					for (unsigned i =0; i < 10; ++i) result[i] = 0;
 
-					 if (theta >= 0){
-						 cout << "L" << theta << '\t' << "Dist: " << d << endl;
-					 }
-					 else {
-						 cout << "R" << theta << '\t' << "Dist: " << d << endl;
-             sprintf(result,"R%f\n", (-1.0)*theta);
-					 }
+						 cout << "theta:" << theta << '\t' << "Dist: " << d << endl;
 					 sprintf(result,"%f",theta);
            write(newsockfd,result, 10);
-					 cout << "theta size: " << sizeof(theta) <<" value:" << (int) theta << endl;
                      //imshow("Contours", drawing);
  
                      //waitKey(20);

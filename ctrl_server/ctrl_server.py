@@ -17,6 +17,7 @@ ctrl_addr = '192.168.1.4'
 fourmb = 1024*1024*4
 v1 = 1566
 v2 = 1580
+vyeild = 1555
 vstopped = 1480
 angle_tolerance = 10
 batt_logfile_name = 'batterylog.txt'
@@ -97,7 +98,7 @@ while True:
      elif data[1] == 'S':#Ack stopped
       currentStatus = 'Stopped'
      elif data[1] == 'F':#ack forward
-      if currentVelocity == v1:
+      if currentVelocity != vyeild:
        currentStatus = 'Yield'
       else:
        currentStatus = 'Driving'
@@ -107,7 +108,6 @@ while True:
      batt_logfile.write(str(data))
     elif data[0] = 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
-     currentVelocity = v1
      pi_cmd.write('F' + str(currentVelocity) + '\n')
     elif data[0] = 'E': #Error
      print("Arduino error found:" + str(data))
@@ -136,8 +136,64 @@ while True:
       else:
        cmd = 'L' + str(-1*currangle) + '\n'
       pi_cmd.sendall(cmd)
+    else:
+      pass
     line_img = last_img
+
    elif src == sign_sock:#cmd from signs
+    data = line_sock.recv(1024)
+    sign_img = last_img
+    if currentStatus == 'Driving':
+     if data[0] == 'C': #Saw no signs
+      pass
+     elif data[0] == 'S': #Saw stop sign
+      currentStatus = 'Stopped'
+      pi_cmd.write('S\n')
+     elif data[0] == 'Y':#Saw Yield sign
+      currentStatus = 'Yeild'
+      currentVelocity = vyeild
+      pi_cmd.sendall('F' + str(vyeild) + '\n')
+     elif data[0] == 'V':#Saw Speed sign
+      if data[1] == '1':#Saw speed 1
+       currentVelocity = v1
+       pi_cmd.sendall('F' + str(v1) + '\n')
+      elif data[1] == '2':#Saw speed 2
+       currentVelocity = v2
+       pi_cmd.sendall('F' + str(v2) + '\n')
+      else:#saw speed wtf?
+       print("Signs gave unknown speed command:" + str(data))
+     else :
+      print('Signs unexpected command:'+ str(data))
+    elif currentStatus == 'Stopped':
+     if data[0] == 'C': #Saw no signs, resume operation
+      currentStatus = "Driving"
+      pi_cmd.sendall('F' + str(currentVelocity) +'\n')
+     elif data[0] == 'S': #Saw stop sign
+      pass
+     elif data[0] == 'Y':#Saw Yield sign
+      print('Saw yeild while stopped!!')
+     elif data[0] == 'V':#Saw Speed sign
+      print('Saw speed while stopped!!')
+     else :
+      print('Signs unexpected command:'+ str(data))
+    elif currentStatus == 'Obstacle':
+     pass
+    elif currentStatus == 'yeild':
+     if data[0] == 'C': #Saw no signs, continue previous speed
+      currentVelocity = V2
+      pi_cmd.sendall('F'+str(currentVelocity) + '\n')
+     elif data[0] == 'S': #Saw stop sign
+      currentStatus = 'Stopped'
+      pi_cmd.write('S\n')
+     elif data[0] == 'Y':#Saw Yield sign
+      pass
+     elif data[0] == 'V':#Saw Speed sign
+      print('Saw speed while yeild!!')
+     else :
+      print('Signs unexpected command:'+ str(data))
+    else:
+     print("In Signs decode, unknown status:" +currentStatus)
+
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
     pi_cmd.sendall(data)

@@ -21,7 +21,9 @@ vyield = 1555
 vstopped = 1480
 angle_tolerance = 10
 batt_logfile_name = 'batterylog.txt'
+batt_thresh = 6.20
 maxturn = 30
+
 
 
 #global variables
@@ -105,7 +107,11 @@ while True:
      else:
          print("Arduino unknown Ack:" + str(data))
     elif data[0] == 'P': #battery power
+     data= str(data).strip('\x00')
      batt_logfile.write(str(data))
+     data= float(data[1:])
+     if data < batt_thresh:
+      print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  
     elif data[0] == 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
      pi_cmd.write('F' + str(currentVelocity) + '\n')

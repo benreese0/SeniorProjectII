@@ -21,7 +21,7 @@ vyield = 1555
 vstopped = 1480
 angle_tolerance = 10
 batt_logfile_name = 'batterylog.txt'
-batt_thresh = 6.20
+batt_thresh = 6.18
 maxturn = 30
 
 
@@ -98,30 +98,36 @@ while True:
      if data[1] == 'L':#ack left
       pass #Don't really care
      elif data[1] == 'R':#ack right
-      pass #Don't really cares
+      pass #Don't really care
      elif data[1] == 'S':#Ack stopped
       currentStatus = 'Stopped'
+      print('Status change:' + currentStatus)
      elif data[1] == 'F':#ack forward
       if currentVelocity != vyield:
        currentStatus = 'Yield'
+       print('Status change:' + currentStatus)
       else:
        currentStatus = 'Driving'
+      print('Status change:' + currentStatus)
      else:
-         print("Arduino unknown Ack:" + str(data))
+      print("Arduino unknown Ack:" + str(data))
     elif data[0] == 'P': #battery power
      data= str(data).strip('\x00')
-     batt_logfile.write(str(data))
-     print(repr(data))
-     data= float(data[1:])
+     data = data.split('\x00')
+     for i in data:
+        batt_logfile.write(str(data[1:]))
+     data= float(str(data[-1:])[1:])
      if data < batt_thresh:
       print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  
     elif data[0] == 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
+     print('Status change:' + currentStatus)
      pi_cmd.sendall('F' + str(currentVelocity) + '\n')
     elif data[0] == 'E': #Error
      print("Arduino error found:" + str(data))
     elif data[0] == 'O': #Obstacle
      currentStatus = 'Obstacle'
+     print('Status change:' + currentStatus)
     else:
      print("Unknown arduino reply:" + str(data))
 
@@ -156,10 +162,10 @@ while True:
      if data[0] == 'C': #Saw no signs
       pass
      elif data[0] == 'S': #Saw stop sign
-      currentStatus = 'Stopped'
       pi_cmd.sendall('S\n')
      elif data[0] == 'Y':#Saw Yield sign
       currentStatus = 'yield'
+      print('Status change:' + currentStatus)
       currentVelocity = vyield
       pi_cmd.sendall('F' + str(vyield) + '\n')
      elif data[0] == 'V':#Saw Speed sign
@@ -175,7 +181,6 @@ while True:
       print('Signs unexpected command:'+ str(data))
     elif currentStatus == 'Stopped':
      if data[0] == 'C': #Saw no signs, resume operation
-      currentStatus = "Driving"
       pi_cmd.sendall('F' + str(currentVelocity) +'\n')
      elif data[0] == 'S': #Saw stop sign
       pass
@@ -192,7 +197,6 @@ while True:
       currentVelocity = V2
       pi_cmd.sendall('F'+str(currentVelocity) + '\n')
      elif data[0] == 'S': #Saw stop sign
-      currentStatus = 'Stopped'
       pi_cmd.sendall('S\n')
      elif data[0] == 'Y':#Saw Yield sign
       pass

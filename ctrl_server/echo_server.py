@@ -3,7 +3,7 @@
 import socket
 import select
 import struct
-
+import time
 
 #constants
 cmd_port = 7777
@@ -31,12 +31,19 @@ img_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 img_sock.connect( (img_addr, lines_port) )
 print("Img connection made")
 
-
+time.sleep(10);
 #startup with centered wheels
+print "sending stuff"
 pi_cmd.sendall('L7\n')
+print "made center"
 
 sources = [pi_img, pi_cmd, img_sock, ctrl_sock]
-
+print "sending more stuff"
+pi_cmd.sendall('L30\n')
+pi_cmd.sendall('R30\n')
+pi_cmd.sendall('L7\n')
+time.sleep(4);
+print "sent more turns"
 while True:
  try:
   inrdy, outrdy, errdy = select.select(sources,[],[])
@@ -56,8 +63,8 @@ while True:
         currangle = 25
     elif currangle < -30:
         currangle = -25
-    if abs(newangle) > 6:
-     currangle = newangle/6 + currangle
+    if abs(newangle-currangle) > 4:
+     currangle = newangle
      currangle = int(currangle)
      print("new currangle:" + str(currangle))
      if currangle >0:

@@ -61,7 +61,9 @@ print("Local control connection made:" + str(ctrl_sock.getpeername()))
 pi_cmd.sendall('\nL7\n')
 batt_logfile =  open(batt_logfile_name, 'a')
 batt_logfile.write('#New session started\n')
-
+firstPic = pi_img.recv(fourmb)
+line_sock.sendall(firstPic);
+sign_sock.sendall(firstPic);
 sources = [pi_img, pi_cmd, ctrl_sock, sign_sock, line_sock]
 destinations = [sign_sock, line_sock]
 #sources = [pi_img, pi_cmd, ctrl_sock, line_sock]
@@ -109,6 +111,7 @@ while True:
     elif data[0] == 'P': #battery power
      data= str(data).strip('\x00')
      batt_logfile.write(str(data))
+     print(repr(data))
      data= float(data[1:])
      if data < batt_thresh:
       print('POWER DANGEROUSLY LOW!!! REPLACE BATTERY NOW!!!')  

@@ -17,7 +17,7 @@ ctrl_addr = '192.168.1.4'
 fourmb = 1024*1024*4
 v1 = 1566
 v2 = 1580
-vyeild = 1555
+vyield = 1555
 vstopped = 1480
 angle_tolerance = 10
 batt_logfile_name = 'batterylog.txt'
@@ -26,9 +26,9 @@ maxturn = 30
 
 #global variables
 
-currentVeloctiy = vstoppped
+currentVeloctiy = vstopped
 currentStatus = str()
-#values: 'Driving' 'Stopped' 'Obstacle' 'Yeild'
+#values: 'Driving' 'Stopped' 'Obstacle' 'yield'
 angle = -8
 last_img = bytes()
 line_img = bytes()
@@ -46,7 +46,7 @@ pi_cmd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pi_cmd.connect( (pi_addr, cmd_port) )
 print("Pi command connection made:" + str(pi_cmd.getpeername()))
 sign_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sign_sock.connect( (img_addr, img_port) )
+sign_sock.connect( (sign_addr, img_port) )
 print("Sign connection made:" + str(sign_sock.getppername()))
 line_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 line_sock.connect( (line_addr, line_port) )
@@ -98,27 +98,27 @@ while True:
      elif data[1] == 'S':#Ack stopped
       currentStatus = 'Stopped'
      elif data[1] == 'F':#ack forward
-      if currentVelocity != vyeild:
+      if currentVelocity != vyield:
        currentStatus = 'Yield'
       else:
        currentStatus = 'Driving'
      else:
          print("Arduino unknown Ack:" + str(data))
-    elif data[0] = 'P': #battery power
+    elif data[0] == 'P': #battery power
      batt_logfile.write(str(data))
-    elif data[0] = 'G': #Go -> obstacle clear
+    elif data[0] == 'G': #Go -> obstacle clear
      currentStatus = 'Driving'
      pi_cmd.write('F' + str(currentVelocity) + '\n')
-    elif data[0] = 'E': #Error
+    elif data[0] == 'E': #Error
      print("Arduino error found:" + str(data))
-    elif data[0] = 'O': #Obstacle
+    elif data[0] == 'O': #Obstacle
      currentStatus = 'Obstacle'
     else:
      print("Unknown arduino reply:" + str(data))
 
    elif src == line_sock:#cmd from lines
     data = line_sock.recv(1024)
-    if currentStatus =='Yeild' or currentStatus == 'Driving':
+    if currentStatus =='yield' or currentStatus == 'Driving':
      data = str(data).strip('\x00') 
      newangle = int(float(data))
      #Deal set maximum angle
@@ -150,9 +150,9 @@ while True:
       currentStatus = 'Stopped'
       pi_cmd.write('S\n')
      elif data[0] == 'Y':#Saw Yield sign
-      currentStatus = 'Yeild'
-      currentVelocity = vyeild
-      pi_cmd.sendall('F' + str(vyeild) + '\n')
+      currentStatus = 'yield'
+      currentVelocity = vyield
+      pi_cmd.sendall('F' + str(vyield) + '\n')
      elif data[0] == 'V':#Saw Speed sign
       if data[1] == '1':#Saw speed 1
        currentVelocity = v1
@@ -171,14 +171,14 @@ while True:
      elif data[0] == 'S': #Saw stop sign
       pass
      elif data[0] == 'Y':#Saw Yield sign
-      print('Saw yeild while stopped!!')
+      print('Saw yield while stopped!!')
      elif data[0] == 'V':#Saw Speed sign
       print('Saw speed while stopped!!')
      else :
       print('Signs unexpected command:'+ str(data))
     elif currentStatus == 'Obstacle':
      pass
-    elif currentStatus == 'yeild':
+    elif currentStatus == 'yield':
      if data[0] == 'C': #Saw no signs, continue previous speed
       currentVelocity = V2
       pi_cmd.sendall('F'+str(currentVelocity) + '\n')
@@ -188,7 +188,7 @@ while True:
      elif data[0] == 'Y':#Saw Yield sign
       pass
      elif data[0] == 'V':#Saw Speed sign
-      print('Saw speed while yeild!!')
+      print('Saw speed while yield!!')
      else :
       print('Signs unexpected command:'+ str(data))
     else:

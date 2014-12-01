@@ -20,6 +20,7 @@ v2 = 1580
 vstopped = 1480
 angle_tolerance = 10
 batt_logfile_name = 'batterylog.txt'
+maxturn = 30
 
 
 #global variables
@@ -90,9 +91,9 @@ while True:
     data = data.strip('\x00')
     if data[0] == 'A':#Ack some command
      if data[1] == 'L':#ack left
-      pass
+      pass #Don't really care
      elif data[1] == 'R':#ack right
-      pass
+      pass #Don't really cares
      elif data[1] == 'S':#Ack stopped
       currentStatus = 'Stopped'
      elif data[1] == 'F':#ack forward
@@ -115,14 +116,28 @@ while True:
     else:
      print("Unknown arduino reply:" + str(data))
 
-   elif src == line_sock:#cmd from img_proc
+   elif src == line_sock:#cmd from lines
     data = line_sock.recv(1024)
-    print("IMGCMD:"+ str(data))
-    angle = angle + float(data[0:4])
-    if angle >0:
-     pi_cmd.sendall('L' + str(int(angle)))   
-    else:
-     pi_cmd.sendall('R' + str(int(-1.0*angle)))
+    if currentStatus =='Yeild' or currentStatus == 'Driving':
+     data = str(data).strip('\x00') 
+     newangle = int(float(data))
+     #Deal set maximum angle
+     if angle > maxangle:
+      angle = maxangle -6
+     if angle < maxangle*-1:
+      angle = -1*maxangle +6
+     #only respond to large enough angle
+     if abs(newangle) >6:
+      angle = newangle/6 +angle
+      angle = int(angle)
+      print("New angle:" + str(angle))
+      if angle >0 :
+       cmd = 'R' + str(currangle) + '\n'
+      else:
+       cmd = 'L' + str(-1*currangle) + '\n'
+      pi_cmd.sendall(cmd)
+    line_img = last_img
+   elif src == sign_sock:#cmd from signs
    elif src == ctrl_sock:#cmd from ctrl
     data = ctrl_sock.recv(1024)
     pi_cmd.sendall(data)

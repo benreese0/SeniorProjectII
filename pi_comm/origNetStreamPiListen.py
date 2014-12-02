@@ -13,14 +13,14 @@ server_socket.bind(('0.0.0.0', 7778))
 server_socket.listen(0)
 
 sock, addr = server_socket.accept()
-
+firstimage= True
 print("connection made with:" + str(addr))
 
 # Make a file-like object out of the connection
 connection = sock.makefile('w+b')
 try:
     with picamera.PiCamera() as camera:
-        camera.resolution = (640, 480)
+        camera.resolution = (1280, 720)
         camera.rotation = 270
         # Start a preview and let the camera warm up for 2 seconds
         camera.start_preview()
@@ -43,6 +43,9 @@ try:
             # Reset the stream for the next capture
             stream.seek(0)
             stream.truncate()
+            if firstimage:
+             print('First image sent')
+             firstimage = False
     # Write a length of zero to the stream to signal we're done
     connection.write(struct.pack('<L', 0))
 finally:

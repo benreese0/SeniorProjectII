@@ -10,8 +10,8 @@ cmd_port = 7777
 img_port = 7778
 lines_port = 7780
 pi_addr = '192.168.1.7'
-img_addr = '192.168.1.4'
-ctrl_addr = '192.168.1.4'
+img_addr = 'localhost'
+ctrl_addr = 'localhost'
 fourmb = 1024*1024*4
 
 

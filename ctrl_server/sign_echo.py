@@ -49,6 +49,7 @@ networkTime_logfile.write("new Session \n")
 line_logfile = open("line_time.txt",'a')
 line_logfile.write("new session \n");
 
+
 prevTime = time.time()
 prevTime2 = time.time()
 sources = [pi_img, pi_cmd, img_sock, img2_sock, ctrl_sock]
@@ -147,8 +148,8 @@ while True:
     else:
      print('strange data:'+repr(data))
    elif src == img2_sock:   
-    pass
-#    data = img2_sock.recv(1024)
+    #pass
+    data = img2_sock.recv(1024)
 #    data = str(data).strip('\x00')
 #    data = data.strip()
 #    data = data.split('\n')
@@ -162,9 +163,9 @@ while True:
 #    if newangle<-30:
 #     newangle=-25
 #    newangle = newangle-7
-#    presTime2 = time.time()
-#    line_logfile.write(str(float(presTime2-prevTime2))+ '\n')
-#    prevTime2 = presTime2
+    presTime2 = time.time()
+    line_logfile.write(str(float(presTime2-prevTime2))+ '\n')
+    prevTime2 = presTime2
 #
 #    #print("newangle"+ str(newangle))
 #    #if currangle > 30:

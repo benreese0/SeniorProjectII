@@ -8,7 +8,7 @@
 
 // Constants
 const int battTimeThresh = 1000;
-const int thresholdVal = 150;
+const int thresholdVal = 50;
 // Global Variables
 Servo turnServo;
 Servo speedServo;
@@ -134,7 +134,7 @@ void loop() {
     stopCar();
     Serial.println("O\n");
     delay(500);
-    while(leftValue>thresholdVal){
+    while(leftValue> 50){
       leftValue = analogRead(leftIRSensor);
     }
     while(Serial.read() != -1);

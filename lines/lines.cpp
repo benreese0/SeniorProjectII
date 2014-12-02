@@ -34,7 +34,7 @@ using namespace cv;
 using namespace std;
  
 Mat og, src, src_gray, img;
-int thresh = 150;
+int thresh = 200;
 int max_thresh = 255;
 
 int newsockfd = 0;
@@ -145,8 +145,9 @@ int main(void)
 				if(og.empty()){
 					cout << "OG EMPTY!!" << endl;}
 
- 				imshow("og", og);
-				waitKey(5);
+ 				//imshow("og", og);
+				//waitKey(5);
+				
 
 		    double xcrop, ycrop;
 			  xcrop = 3.5/8.0;
@@ -159,7 +160,7 @@ int main(void)
         //cvtColor(src, src_gray, CV_RGB2GRAY);
 				src.copyTo(src_gray);
  
-        imshow ("src", src);
+        //imshow ("src", src);
  
         GaussianBlur(src_gray, src_gray, Size(9,9),0,0);
  
@@ -174,7 +175,8 @@ int main(void)
 				if(canny_output.empty()){
 					cout << "canny EMPTY!!" << endl;}
         /// Find contours
-				//imshow("Cany_output",canny_output);
+				imshow("Cany_output",canny_output);
+				//waitKey(2);
         findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
         /// Draw contours
@@ -199,7 +201,7 @@ int main(void)
                      line(src,Point(src_gray.cols-1,righty),Point(0,lefty),Scalar(0,0,255),2);
  
                      double theta = atan((lines[1])/(lines[0])) * 57.2957795;
-										cout << "theta og:" << theta << endl;
+										//cout << "theta og:" << theta << endl;
 									 theta = theta - 45;	
 										 // final factor converts from radians to degress and shifts for perspective
 					 
@@ -230,7 +232,7 @@ int main(void)
        //imshow ("img", src);
        //imshow("original", og);
        //waitKey(20);
-       cout << "end:\t"<< time(0)-t_val << endl;
+       //cout << "end:\t"<< time(0)-t_val << endl;
        }
  
        close(newsockfd);

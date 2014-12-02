@@ -417,7 +417,7 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                                 str = "V2";
                                 cout << "diff: " << diff << endl;
                             }
-                            imshow("diff", diffImg);
+                            //imshow("diff", diffImg);
                             //imshow("act", new_image);
                             //waitKey(1);
                         }
@@ -540,7 +540,7 @@ int main(void) {
         if(og.empty()){
             cout << "OG EMPTY!!" << endl;}
         //imshow("og", og);
-        waitKey(2);
+        //waitKey(2);
         delete [] imgBuff;
 
 
@@ -562,7 +562,7 @@ int main(void) {
         /// Detect edges using canny
         Canny(greyImg, canny_output, lowThreshold, lowThreshold * 3, 3);
 
-        imshow("canny_output",canny_output); // can comment out when calibrated
+        //imshow("canny_output",canny_output); // can comment out when calibrated
 
         /// Find contours
         findContours(canny_output, contours, hierarchy, CV_RETR_TREE,

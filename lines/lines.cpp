@@ -218,7 +218,7 @@ int main(void)
 					for (unsigned i =0; i < 10; ++i) result[i] = 0;
 
 						 cout << "theta:" << theta << '\t' << "Dist: " << d << endl;
-					 sprintf(result,"%f",theta);
+					 sprintf(result,"%f\n",theta);
            write(newsockfd,result, 10);
                      //imshow("Contours", drawing);
  

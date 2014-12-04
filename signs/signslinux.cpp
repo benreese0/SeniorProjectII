@@ -9,6 +9,7 @@
 
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -409,13 +410,13 @@ string speed(std::vector<vector<Point> >&contours, Symbol *symbols,Mat &greyImg)
                             //minDiff = diff;
                             	match = true;
                            	  str = "V1";
-                          	  cout << "diff: " << diff << endl;
+                          	  //cout << "diff: " << diff << endl;
                             }
                             if (diff < minDiff  && i == 1) {
                                 //cout << "Hi" << endl;
                                 match = true;
                                 str = "V2";
-                                cout << "diff: " << diff << endl;
+                                //cout << "diff: " << diff << endl;
                             }
                             //imshow("diff", diffImg);
                             //imshow("act", new_image);
@@ -495,14 +496,14 @@ int main(void) {
         exit(1);
     }
     listen(sockfd,5);
-    cout << "Listening \n " << endl;
+    //cout << "Listening \n " << endl;
     newsockfd = accept(sockfd, NULL,NULL);
     if (newsockfd<0)
     {
         perror("ERROR on accept");
         exit(1);
     }
-    cout << "Accepted connection" << endl;
+    //cout << "Accepted connection" << endl;
     Mat camera;
     Mat greyImg;
 
@@ -513,7 +514,7 @@ int main(void) {
     }
 
     //createTrackbar("Min Threshold:", "A", &lowThreshold, 100, CannyThreshold);
-
+    time_t t_val;
 
     //cap >> camera;
 
@@ -532,13 +533,13 @@ int main(void) {
             nread += read(newsockfd, (imgBuff+nread),n-nread);
         }
 				if (firstimage) {
-					cout <<"First image received" << endl;
+					//cout <<"First image received" << endl;
 					firstimage = !firstimage;
 				}
         imgVec.assign(imgBuff,imgBuff+n);
         imdecode(imgVec,CV_LOAD_IMAGE_GRAYSCALE, &og);
-        if(og.empty()){
-            cout << "OG EMPTY!!" << endl;}
+        if(og.empty()){}
+            //cout << "OG EMPTY!!" << endl;}
         //imshow("og", og);
         //waitKey(2);
         delete [] imgBuff;
@@ -553,7 +554,6 @@ int main(void) {
         // resize(camera,greyImg, Size(camera.cols/3, camera.rows/3), 0, 0);
 
         //cvtColor(camera, greyImg, CV_RGB2GRAY);
-
         Mat canny_output;
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
@@ -562,6 +562,7 @@ int main(void) {
         /// Detect edges using canny
         Canny(greyImg, canny_output, lowThreshold, lowThreshold * 3, 3);
 
+        //imshow("canny_output",canny_output); // can comment out when calibrated
         //imshow("canny_output",canny_output); // can comment out when calibrated
 
         /// Find contours
@@ -604,10 +605,9 @@ int main(void) {
 //            cout << result << d << endl;
             sprintf(finalResult,"%s%f\n",result.c_str(),d);
             write(newsockfd,finalResult,6);
-						cout << "results:" << finalResult << endl;
+						//cout << "results:" << finalResult << endl;
             printf("%f time\n",seconds/CLOCKS_PER_SEC);
             match = false;
-
             //imshow("A", camera);
 
             //system("pause");
